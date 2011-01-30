@@ -8,5 +8,3 @@ extends-cache/*
 develop-eggs
 parts
 src/*.egg-info
-#TODO:remove
-src/quotationtool/categorization/browser

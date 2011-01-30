@@ -1,0 +1,20 @@
+<div i18n:domain="quotationtool">
+  
+  <h1 i18n:translate="categoryset-attribution-label">
+    Attributions of Category Set
+  </h1>
+
+  <table>
+    <tr tal:repeat="category context/values">
+      <td tal:content="category/title"/>
+      <td tal:content="category"/>
+      <!--td tal:content="python:len(category.attribution)"/-->
+      <!--td>
+	<span tal:repeat="attr category/attribution">
+	  <span tal:content="attr"/>
+	</span>
+      </td-->
+    </tr>
+  </table>
+
+</div>

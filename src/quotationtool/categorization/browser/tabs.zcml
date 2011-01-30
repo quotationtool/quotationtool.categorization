@@ -1,0 +1,123 @@
+<configure
+    xmlns:zope="http://namespaces.zope.org/zope"
+    xmlns:z3c="http://namespaces.zope.org/z3c"
+    xmlns:browser="http://namespaces.zope.org/browser"
+    i18n_domain="quotationtool">
+    
+  <!-- tabs -->
+  
+  <z3c:contextMenuItem
+      for="..interfaces.ICategoriesContainer"
+      title="[catgoriescontainer-tab] Classification System"
+      name="categoriescontainer"
+      permission="zope.View"
+      layer="quotationtool.skin.interfaces.IQuotationtoolBrowserLayer"
+      manager="quotationtool.skin.interfaces.IItemTabs"
+      viewName="@@index.html"
+      weight="60"
+      />
+  <z3c:contextMenuItem
+      for="..interfaces.ICategoriesContainer"
+      title="[catogoryset-add-tab] Add Category Set"
+      name="categoryset-add"
+      permission="zope.View"
+      layer="quotationtool.skin.interfaces.IQuotationtoolBrowserLayer"
+      manager="quotationtool.skin.interfaces.IItemTabs"
+      viewName="@@addCategorySet.html"
+      weight="110"
+      />
+  
+  <z3c:contextMenuItem
+      for="..interfaces.ICategorySet"
+      title="[catgoriescontainer-tab] Classification System"
+      name="categoriescontainer2"
+      permission="zope.View"
+      layer="quotationtool.skin.interfaces.IQuotationtoolBrowserLayer"
+      manager="quotationtool.skin.interfaces.IItemTabs"
+      viewName="../@@index.html"
+      weight="60"
+      />
+  <z3c:contextMenuItem
+      for="..interfaces.ICategorySet"
+      title="[categoryset-tab] Category Set"
+      name="categoryset"
+      permission="zope.View"
+      layer="quotationtool.skin.interfaces.IQuotationtoolBrowserLayer"
+      manager="quotationtool.skin.interfaces.IItemTabs"
+      viewName="@@index.html"
+      weight="200"
+      />  
+  <z3c:contextMenuItem
+      for="..interfaces.ICategorySet"
+      title="[categoryset-edit-tab] Edit"
+      name="categoryset-edit"
+      permission="quotationtool.categorization.EditCategory"
+      layer="quotationtool.skin.interfaces.IQuotationtoolBrowserLayer"
+      manager="quotationtool.skin.interfaces.IItemTabs"
+      viewName="@@edit.html"
+      weight="210"
+      />  
+  <z3c:contextMenuItem
+      for="..interfaces.ICategorySet"
+      title="[category-add-tab] Add Category"
+      name="category-add"
+      permission="zope.View"
+      layer="quotationtool.skin.interfaces.IQuotationtoolBrowserLayer"
+      manager="quotationtool.skin.interfaces.IItemTabs"
+      viewName="@@addCategory.html"
+      weight="220"
+      />
+  
+  <z3c:contextMenuItem
+      for="..interfaces.ICategory"
+      title="[catgoriescontainer-tab] Classification System"
+      name="categoriescontainer3"
+      permission="zope.View"
+      layer="quotationtool.skin.interfaces.IQuotationtoolBrowserLayer"
+      manager="quotationtool.skin.interfaces.IItemTabs"
+      viewName="../../@@index.html"
+      weight="60"
+      />
+  <z3c:contextMenuItem
+      for="..interfaces.ICategory"
+      title="[categoryset-tab] Category Set"
+      name="categoryset2"
+      permission="zope.View"
+      layer="quotationtool.skin.interfaces.IQuotationtoolBrowserLayer"
+      manager="quotationtool.skin.interfaces.IItemTabs"
+      viewName="../@@index.html"
+      weight="200"
+      />  
+  <z3c:contextMenuItem
+      for="..interfaces.ICategory"
+      title="[category-tab] Category"
+      name="category"
+      permission="zope.View"
+      layer="quotationtool.skin.interfaces.IQuotationtoolBrowserLayer"
+      manager="quotationtool.skin.interfaces.IItemTabs"
+      viewName="@@index.html"
+      weight="300"
+      />
+  <z3c:contextMenuItem
+      for="..interfaces.ICategory"
+      title="[category-edit-tab] Edit"
+      name="category-edit"
+      permission="quotationtool.categorization.EditCategory"
+      layer="quotationtool.skin.interfaces.IQuotationtoolBrowserLayer"
+      manager="quotationtool.skin.interfaces.IItemTabs"
+      viewName="@@edit.html"
+      weight="310"
+      />
+    
+  <z3c:contextMenuItem
+      for="..interfaces.ICategorizable"
+      title="[classification] Classification"
+      name="classification"
+      permission="zope.View"
+      layer="quotationtool.skin.interfaces.IQuotationtoolBrowserLayer"
+      manager="quotationtool.skin.interfaces.IItemTabs"
+      viewName="@@attribution.html"
+      weight="310"
+      />
+    
+</configure>

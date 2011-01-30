@@ -51,7 +51,6 @@ setup(
         'zope.container',
         'zope.exceptions',
         'zope.i18nmessageid',
-        'zc.relation',
         'zope.app.content',
         'zope.annotation',
         'zope.dublincore',
@@ -59,12 +58,12 @@ setup(
         'zope.securitypolicy',
         'zope.app.schema',
         'zope.componentvocabulary',
-
-        'quotationtool.site',
-        'quotationtool.security',
-        'quotationtool.renderer',
-        'quotationtool.relation',
-        'quotationtool.skin',
+        'zope.intid',
+        'zope.app.component',
+        'zope.traversing',
+        'zope.location',
+        'zope.site',
+        'zope.keyreference',
 
         'z3c.template',
         'z3c.macro',
@@ -75,18 +74,20 @@ setup(
         'zope.publisher',
         'z3c.formui',
         'z3c.form',
-        'zc.resourcelibrary',
         'z3c.menu.ready2go',
-
         'zope.app.pagetemplate',
         'zope.viewlet',
-        'zope.app.component',
+
+        'quotationtool.site',
+        'quotationtool.security',
+        'quotationtool.skin',
         ],
     extras_require = dict(
         test = [
             'zope.testing',
             'zope.app.testing',
             'zope.configuration',
+            'lxml'
             ],
         ),
     )

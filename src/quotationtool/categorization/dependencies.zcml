@@ -13,9 +13,7 @@
   <include package="zope.app.schema"/>
   
   <include package="quotationtool.security"/>
-  <include package="quotationtool.renderer"/>
   <include package="quotationtool.site"/>
-  <include package="quotationtool.relation"/>
   
 
 </configure>

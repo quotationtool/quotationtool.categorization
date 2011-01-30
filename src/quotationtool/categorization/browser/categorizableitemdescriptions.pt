@@ -1,0 +1,51 @@
+<div i18n:domain="quotationtool">
+  
+  <h1 i18n:translate="categorizableitemdescriptions-container-label">
+    Categorizable Item Classes
+  </h1>
+
+  <table>
+    <thead>
+      <tr>
+	<td>
+	  <span class="title" 
+	      tal:content="modules/quotationtool/categorization/interfaces/ICategorizableItemDescription/label/title"
+	      >Label</span>
+	  <span class="description"
+	      tal:content="modules/quotationtool/categorization/interfaces/ICategorizableItemDescription/label/description"
+	      >Description of the interface which users ...</span>
+	</td>
+	<td>
+	  <span class="title" 
+	      tal:content="modules/quotationtool/categorization/interfaces/ICategorizableItemDescription/interface/title"
+	      >Interface</span>
+	  <span class="description"
+	      tal:content="modules/quotationtool/categorization/interfaces/ICategorizableItemDescription/interface/description"
+	      >Choose a Zope-Interface from the ...</span>
+	</td>
+      </tr>
+    </thead>
+    <tbody>
+    <tal:block repeat="description context/values">
+      <tr>
+	<td>
+	  <a href="" class="content-item" 
+	      tal:attributes="href description/@@absolute_url"
+	      tal:content="description/label">Reference</a>
+	</td>
+	<td tal:content="python: description.interface"
+	    >quotationtool.referatory.interfaces.IReference</td>
+      </tr>
+    </tal:block>
+    </tbody>
+  </table>
+
+  <div class="add-content-options">
+    <a i18n:translate="add-categorizableitemdescription"
+       href="../addCategorizableItemDescription.html"
+       tal:attributes="href string:${context/@@absolute_url}/@@addCategorizableItemDescription.html"
+       >Add a Categorizable Item Class</a>
+  </div>
+
+
+</div>

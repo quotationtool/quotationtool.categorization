@@ -1,0 +1,122 @@
+<div i18n:domain="quotationtool" id="categoriescontainer">
+
+  <h1 i18n:translate="categoriescontainer-container-label"
+      >Classification System</h1>
+
+  <p i18n:translate="categoriescontainer-desc">
+    The classification system is defined and evolved by the
+    users. They can add categories (classes) and group them together
+    into category sets (classes of classes). <br/><b>category
+    sets</b>: Related categories are bundled into category
+    sets. <br/><b>mode</b>: The categories in each set are ether
+    mutually exclusive or non-exclusive, i.e. ether only one category
+    of a set can be attributed to an item (exclusive) or many can be
+    attributed (non-exclusive). Exclusiveness or non-exclusiveness is
+    set in the ``mode'' field of a category set. <br/><b>weight</b>:
+    For ordered classification forms (relevance, importance,
+    unlikelihood) both, category sets and categories, have a
+    ``weight'' field. They are ordered by ascending ``weight''.
+  </p>
+
+  <table class="container-listing">
+    <thead class="head">
+      <tr>
+	<td class="categoryset" 
+	    i18n:translate="categoriescontainer-categoryset-column-label">
+	    Category Set
+	</td>
+	<td class="description">
+	  <span tal:content="modules/quotationtool/categorization/interfaces/ICategorySet/description/title">
+	    Description
+	  </span>
+	</td>
+	<td class="categories">
+	  <span i18n:translate="">
+	    Categories
+	  </span>
+	</td>
+	<td class="categorizable_items">
+	  <span tal:content="modules/quotationtool/categorization/interfaces/ICategorySet/categorizable_items/title">
+	    Categorizable Items
+	  </span>
+	</td>
+	<td class="mode">
+	  <span tal:content="modules/quotationtool/categorization/interfaces/ICategorySet/mode/title">
+	    Mode
+	  </span>
+	</td>
+	<td class="inherit">
+	  <span tal:content="modules/quotationtool/categorization/interfaces/ICategorySet/inherit/title">
+	    Inherit
+	  </span>
+	</td>
+	<td class="weight">
+	  <span tal:content="modules/quotationtool/categorization/interfaces/ICategorySet/weight/title">
+	    Weight
+	  </span>
+	</td>
+      </tr>
+    </thead>
+    <tbody>
+      <tal:block repeat="category_set context/values">
+      <tr tal:condition="repeat/category_set/odd" class="odd">
+	<td>
+	  <a class="content-item" href=""
+	     tal:content="category_set/title"
+	     tal:attributes="href category_set/@@absolute_url"/>
+	</td>
+	<td tal:content="category_set/description | nothing"/>
+	<td>
+	  <ul class="categories-vector">
+	    <tal:block 
+		repeat="category python:sorted(category_set.values(), cmp = lambda x,y: cmp(x.weight, y.weight))">
+	    <li tal:content="category/title"/>
+	    </tal:block>
+	  </ul>
+	</td>
+	<td>
+	  <span tal:repeat="item python:view.getItemTitle(category_set.categorizable_items)">
+	    <span tal:content="item"/><span tal:condition="not:repeat/item/end">,<br/></span>
+	  </span>
+	</td>
+	<td tal:content="category_set/mode"/>
+	<td tal:content="category_set/inherit"/>
+	<td tal:content="category_set/weight"/>
+      </tr>
+      <tr tal:condition="repeat/category_set/even" class="even">
+	<td>
+	  <a class="content-item" href=""
+	     tal:content="category_set/title"
+	     tal:attributes="href category_set/@@absolute_url"/>
+	</td>
+	<td tal:content="category_set/description | nothing"/>
+	<td>
+	  <ul class="categories-vector">
+	    <tal:block 
+		repeat="category python:sorted(category_set.values(), cmp = lambda x,y: cmp(x.weight, y.weight))">
+	    <li tal:content="category/title"/>
+	    </tal:block>
+	  </ul>
+	</td>
+	<td>
+	  <span tal:repeat="item python:view.getItemTitle(category_set.categorizable_items)">
+	    <span tal:content="item"/><span tal:condition="not:repeat/item/end">,<br/></span>
+	  </span>
+	</td>
+	<td tal:content="category_set/mode"/>
+	<td tal:content="category_set/inherit"/>
+	<td tal:content="category_set/weight"/>
+      </tr>
+      </tal:block>
+    </tbody>
+  </table>
+
+  <div class="add-content-options">
+    <a i18n:translate="add-categoryset"
+       href="../addCategorySet.html"
+       tal:attributes="href string:${context/@@absolute_url}/@@addCategorySet.html"
+       >Add a new Category Set</a>
+  </div>
+
+
+</div>

@@ -1,0 +1,78 @@
+<div i18n:domain="quotationtool" id="attribution">
+  <metal:block use-macro="macro:form">
+
+    <metal:block fill-slot="label">
+      <h1 tal:condition="view/label|nothing"
+	  tal:content="view/label">
+        Categorization
+      </h1>
+    </metal:block>
+ 
+    <div metal:fill-slot="info">
+      <!--div class="content-item-details" 
+	  tal:content="structure context/@@details|nothing">
+	Author: Title...
+      </div-->
+      <metal:block define-macro="attribution-desc">
+      <p class="attribution-desc">
+	<span i18n:translate="attribution-desc">
+	  The form below asks for a categorization of this item. The
+	  categories (classes) given in the form were defined by users of this
+	  website.
+	</span>
+	<a href="/categories/"
+	     tal:attributes="href string:${request/URL/1}/categories/"
+	     i18n:translate="more-link">
+	  [more]
+	</a>
+      </p>
+      </metal:block>
+    </div>
+
+    <div metal:fill-slot="main" id="attribution-rows">
+    <metal:block define-macro="attribution-rows">
+              <tal:block repeat="widget view/widgets/values">
+          <div id="" class="row"
+               tal:attributes="id string:${widget/id}-row"
+               tal:condition="python:widget.mode != 'hidden'">
+            <metal:block define-macro="widget-row">
+              <div class="label">
+                <label tal:attributes="for widget/id">
+                  <span i18n:translate=""
+                      tal:content="widget/label">label</span>
+                  <span class="required"
+                        tal:condition="widget/required">*</span>
+                </label>
+		<div class="description">
+		  <span
+		      tal:content="structure widget/field/description | default">
+		    (No description available)
+		  </span>
+		  <a href=""
+		      class="content-item"
+		      tal:attributes="href widget/field/category_set/@@absolute_url"
+		      i18n:translate="more-link">
+		    [more]
+		  </a>
+		</div>
+              </div>
+              <div class="widget" tal:content="structure widget/render">
+                <input type="text" size="24" value="" />
+              </div>
+              <div class="error"
+                   tal:condition="widget/error">
+                <span tal:replace="structure widget/error/render">error</span>
+              </div>
+            </metal:block>
+          </div>
+          <input type="hidden" value=""
+                 tal:condition="python:widget.mode == 'hidden'"
+                 tal:replace="structure widget/render" />
+        </tal:block>
+    </metal:block>
+    </div>
+
+
+
+  </metal:block>
+</div>

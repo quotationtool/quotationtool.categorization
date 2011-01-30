@@ -1,0 +1,212 @@
+<configure
+    xmlns="http://namespaces.zope.org/browser"
+    xmlns:z3c="http://namespaces.zope.org/z3c"
+    xmlns:zope="http://namespaces.zope.org/zope"
+    i18n_domain="quotationtool">
+
+  <include file="dependencies.zcml"/>
+
+  <!-- related to categorizable item description -->
+
+  <z3c:pagelet
+      for="..interfaces.ICategorizableItemDescriptions"
+      name="index.html"
+      class=".categorizableitemdescription.CategorizableItemDescriptionsContainerView"
+      layer="quotationtool.skin.interfaces.IQuotationtoolBrowserLayer"
+      permission="zope.View"
+      />
+  <z3c:template
+      for=".categorizableitemdescription.CategorizableItemDescriptionsContainerView"
+      template="categorizableitemdescriptions.pt"
+      layer="quotationtool.skin.interfaces.IQuotationtoolBrowserLayer"
+      />
+
+  <z3c:pagelet
+      for="..interfaces.ICategorizableItemDescriptions"
+      name="addCategorizableItemDescription.html"
+      class=".categorizableitemdescription.AddCategorizableItemDescription"
+      layer="quotationtool.skin.interfaces.IQuotationtoolBrowserLayer"
+      permission="quotationtool.categorization.ManageCategorization"
+      />
+
+  <z3c:pagelet
+      for="..interfaces.ICategorizableItemDescription"
+      name="index.html"
+      class=".categorizableitemdescription.EditCategorizableItemDescription"
+      layer="quotationtool.skin.interfaces.IQuotationtoolBrowserLayer"
+      permission="quotationtool.categorization.ManageCategorization"
+      />
+
+
+  <!-- related to categories-container -->
+  
+  <z3c:pagelet
+      for="..interfaces.ICategoriesContainer"
+      name="index.html"
+      class=".categoriescontainer.CategoriesContainerContainerView"
+      layer="quotationtool.skin.interfaces.IQuotationtoolBrowserLayer"
+      permission="zope.View"
+      />
+  <z3c:template
+      for=".categoriescontainer.CategoriesContainerContainerView"
+      template="categoriescontainer.pt"
+      layer="quotationtool.skin.interfaces.IQuotationtoolBrowserLayer"
+      />
+
+
+  <!-- related to category set -->
+
+  <z3c:pagelet
+      for="..interfaces.ICategoriesContainer"
+      name="addCategorySet.html"
+      class=".categoryset.AddCategorySet"
+      layer="quotationtool.skin.interfaces.IQuotationtoolBrowserLayer"
+      permission="quotationtool.categorization.AddCategory"
+      />
+
+  <z3c:pagelet
+      for="..interfaces.ICategorySet"
+      name="index.html"
+      class=".categoryset.CategorySetContainerView"
+      layer="quotationtool.skin.interfaces.IQuotationtoolBrowserLayer"
+      permission="zope.View"
+      />
+  <z3c:template
+      for=".categoryset.CategorySetContainerView"
+      template="categoryset.pt"
+      layer="quotationtool.skin.interfaces.IQuotationtoolBrowserLayer"
+      />
+  
+  <z3c:pagelet
+      for="..interfaces.ICategorySet"
+      name="edit.html"
+      class=".categoryset.EditCategorySet"
+      layer="quotationtool.skin.interfaces.IQuotationtoolBrowserLayer"
+      permission="quotationtool.categorization.EditCategory"
+      />
+
+  <z3c:pagelet
+      for="..interfaces.ICategorySet"
+      name="attributions.html"
+      class=".categoryset.CategorySetAttributions"
+      layer="quotationtool.skin.interfaces.IQuotationtoolBrowserLayer"
+      permission="zope.View"
+      />
+  <z3c:template
+      for=".categoryset.CategorySetAttributions"
+      template="categoryset_attributions.pt"
+      layer="quotationtool.skin.interfaces.IQuotationtoolBrowserLayer"
+      />
+
+
+  <!-- related to category -->
+
+  <z3c:pagelet
+      for="..interfaces.ICategorySet"
+      name="addCategory.html"
+      class=".category.AddCategory"
+      layer="quotationtool.skin.interfaces.IQuotationtoolBrowserLayer"
+      permission="quotationtool.categorization.AddCategory"
+      />
+  
+  <z3c:pagelet
+      for="..interfaces.ICategory"
+      name="index.html"
+      class=".category.DisplayCategory"
+      layer="quotationtool.skin.interfaces.IQuotationtoolBrowserLayer"
+      permission="zope.View"
+      />
+
+  <z3c:pagelet
+      for="..interfaces.ICategory"
+      name="edit.html"
+      class=".category.EditCategory"
+      layer="quotationtool.skin.interfaces.IQuotationtoolBrowserLayer"
+      permission="quotationtool.categorization.EditCategory"
+      />
+
+
+  <!-- categorizable item -->
+
+  <z3c:pagelet
+      for="..interfaces.ICategorizable"
+      name="doAttribution.html"
+      class=".attribution.AttributionForm"
+      layer="quotationtool.skin.interfaces.IQuotationtoolBrowserLayer"
+      permission="quotationtool.categorization.DoAttribution"
+      />
+  <z3c:template
+      for=".attribution.AttributionForm"
+      layer="quotationtool.skin.interfaces.IQuotationtoolBrowserLayer"
+      template="attribution.pt"
+      />
+  <z3c:macro
+      name="attribution-desc"
+      template="attribution.pt"
+      layer="quotationtool.skin.interfaces.IQuotationtoolBrowserLayer"
+      />
+  <z3c:macro
+      name="attribution-rows"
+      template="attribution.pt"
+      layer="quotationtool.skin.interfaces.IQuotationtoolBrowserLayer"
+      />
+
+  <z3c:pagelet
+      for="..interfaces.ICategorizable"
+      name="attribution.html"
+      class=".attribution.AttributionDisplayForm"
+      layer="quotationtool.skin.interfaces.IQuotationtoolBrowserLayer"
+      permission="zope.View"
+      />
+  <z3c:template
+      for=".attribution.AttributionDisplayForm"
+      layer="quotationtool.skin.interfaces.IQuotationtoolBrowserLayer"
+      template="attribution_display.pt"
+      />
+
+
+  <zope:class 
+      class=".widget.ExclusiveAttributionWidget">
+    <require
+        permission="zope.Public"
+        interface=".widget.IExclusiveAttributionWidget"
+        />
+  </zope:class>
+
+  <zope:adapter
+      factory=".widget.ExclusiveAttributionFieldWidget"
+      />
+
+  <z3c:widgetTemplate
+      mode="display"
+      template="exclusive.pt"
+      layer="z3c.form.interfaces.IFormLayer"
+      widget="quotationtool.categorization.browser.widget.IExclusiveAttributionWidget"
+      />
+
+
+  <zope:class 
+      class=".widget.NonExclusiveAttributionWidget">
+    <require
+        permission="zope.Public"
+        interface=".widget.INonExclusiveAttributionWidget"
+        />
+  </zope:class>
+
+  <zope:adapter
+      factory=".widget.NonExclusiveAttributionFieldWidget"
+      />
+
+  <z3c:widgetTemplate
+      mode="display"
+      template="nonexclusive.pt"
+      layer="z3c.form.interfaces.IFormLayer"
+      widget=".widget.INonExclusiveAttributionWidget"
+      />
+
+
+  <include file="nav.zcml"/>
+  <include file="tabs.zcml"/>
+
+</configure>
+    

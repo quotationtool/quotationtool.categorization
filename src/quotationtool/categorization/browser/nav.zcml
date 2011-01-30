@@ -1,0 +1,83 @@
+<configure
+    xmlns:zope="http://namespaces.zope.org/zope"
+    xmlns:z3c="http://namespaces.zope.org/z3c"
+    xmlns:browser="http://namespaces.zope.org/browser"
+    i18n_domain="quotationtool">
+
+  <!-- navigation -->
+
+  <z3c:siteMenuItem
+      for="*"
+      title="[catgoriescontainer-navigation] Classification"
+      name="categories"
+      class=".nav.CategoriesContainerMainNavItem"
+      permission="zope.View"
+      layer="quotationtool.skin.interfaces.IQuotationtoolBrowserLayer"
+      manager="quotationtool.skin.interfaces.IMainNav"
+      viewName="categories/"
+      subMenuProviderName="categorizationsubnav"
+      weight="100"
+      />
+
+  <zope:adapter
+      factory="z3c.menu.ready2go.checker.TrueSelectedChecker"
+      for="..interfaces.ICategoriesContainer
+	   quotationtool.skin.interfaces.IQuotationtoolBrowserLayer
+	   zope.interface.Interface
+	   quotationtool.skin.interfaces.IMainNav
+	   .nav.ICategoriesContainerMainNavItem"
+      provides="z3c.menu.ready2go.interfaces.ISelectedChecker"
+      />
+
+  <zope:adapter
+      factory="z3c.menu.ready2go.checker.TrueSelectedChecker"
+      for="..interfaces.ICategorySet
+	   quotationtool.skin.interfaces.IQuotationtoolBrowserLayer
+	   zope.interface.Interface
+	   quotationtool.skin.interfaces.IMainNav
+	   .nav.ICategoriesContainerMainNavItem"
+      provides="z3c.menu.ready2go.interfaces.ISelectedChecker"
+      />
+
+  <zope:adapter
+      factory="z3c.menu.ready2go.checker.TrueSelectedChecker"
+      for="..interfaces.ICategory
+	   quotationtool.skin.interfaces.IQuotationtoolBrowserLayer
+	   zope.interface.Interface
+	   quotationtool.skin.interfaces.IMainNav
+	   .nav.ICategoriesContainerMainNavItem"
+      provides="z3c.menu.ready2go.interfaces.ISelectedChecker"
+      />
+
+  <browser:viewletManager
+      name="categorizationsubnav"
+      class=".nav.CategorizationSubNav"
+      provides=".nav.ICategorizationSubNav"
+      permission="zope.View"
+      layer="quotationtool.skin.interfaces.IQuotationtoolBrowserLayer"
+      />
+
+  
+  <z3c:siteMenuItem
+      for="*"
+      title="[catgoriescontainer-navigation] Classification"
+      name="categoryscontainer"
+      permission="zope.View"
+      layer="quotationtool.skin.interfaces.IQuotationtoolBrowserLayer"
+      manager=".nav.ICategorizationSubNav"
+      viewName="categories/"
+      weight="10"
+      />
+  
+  <z3c:siteMenuItem
+      for="*"
+      title="[catogoryset-add-navigation] Add Category Set"
+      name="categoryset-add"
+      permission="zope.View"
+      layer="quotationtool.skin.interfaces.IQuotationtoolBrowserLayer"
+      manager=".nav.ICategorizationSubNav"
+      viewName="categories/@@addCategorySet.html"
+      weight="110"
+      />
+    
+</configure>

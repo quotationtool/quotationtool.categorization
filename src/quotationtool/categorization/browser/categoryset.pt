@@ -1,0 +1,60 @@
+<div i18n:domain="quotationtool" id="categoryset">
+  
+  <metal:macro use-macro="macro:subform-display">
+  </metal:macro>
+
+
+  <h2 i18n:translate="">Categories</h2>
+      
+  <table class="container-listing">
+    <thead class="head">
+      <tr>
+	<td class="title">
+	  <span 
+	      tal:content="modules/quotationtool/categorization/interfaces/ICategory/title/title"
+	      />
+	</td>
+	<td class="description">
+	  <span 
+	      tal:content="modules/quotationtool/categorization/interfaces/ICategory/description/title"
+	      />
+	</td>
+	<td class="weight">
+	  <span 
+	      tal:content="modules/quotationtool/categorization/interfaces/ICategory/weight/title"
+	      />
+	</td>
+      </tr>
+    </thead>
+    <tbody>
+      <tal:block repeat="category context/values">
+      <tr tal:condition="repeat/category/odd" class="odd">
+	<td>
+	  <a class="content-item"
+	     tal:attributes="href category/@@absolute_url"
+	     tal:content="category/title"/>
+	</td>
+	<td tal:content="category/description"/>
+	<td tal:content="category/weight"/>
+      </tr>
+      <tr tal:condition="repeat/category/even" class="even">
+	<td>
+	  <a class="content-item"
+	     tal:attributes="href category/@@absolute_url"
+	     tal:content="category/title"/>
+	</td>
+	<td tal:content="category/description"/>
+	<td tal:content="category/weight"/>
+      </tr>
+      </tal:block>
+    </tbody>
+  </table>
+
+  <div class="add-content-options">
+    <a i18n:translate="add-category"
+       href="addCategory.html"
+       tal:attributes="href string:${context/@@absolute_url}/@@addCategory.html"
+       >Add a new Category</a>
+  </div>
+
+</div>

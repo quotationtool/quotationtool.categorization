@@ -1,0 +1,207 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    i18n_domain="quotationtool">
+
+  <include file="dependencies.zcml"/>
+
+  <include file="permissions.zcml"/>
+  <!-- include in your app
+  <include file="roles.zcml"/>
+  -->
+
+  <subscriber
+      handler=".weighteditemscontainer.updateWeightedItemsContainerOrder"
+      />
+
+
+  <interface
+      interface=".interfaces.ICategorizableItemDescription"
+      type="zope.app.content.interfaces.IContentType"
+      />
+
+  <class
+      class=".categorizableitemdescription.CategorizableItemDescriptions">
+    <implements
+        interface="zope.annotation.interfaces.IAttributeAnnotatable"
+	/>
+    <allow
+	interface="zope.container.interfaces.IReadContainer"
+	/>
+    <require
+	permission="quotationtool.categorization.ManageCategorization"
+	interface="zope.container.interfaces.IWriteContainer"
+	/>
+  </class>
+
+  <interface
+      interface=".interfaces.ICategorizableItemDescription"
+      type="zope.app.content.interfaces.IContentType"
+      />
+
+  <subscriber
+      handler=".categorizableitemdescription.createCategorizableItemDescriptionContainer"
+      />
+
+  <class
+      class=".categorizableitemdescription.CategorizableItemDescription"
+      >
+    <implements
+        interface="zope.annotation.interfaces.IAttributeAnnotatable"
+	/>
+    <allow
+	interface=".interfaces.ICategorizableItemDescription"
+	/>
+    <require
+	permission="quotationtool.categorization.ManageCategorization"
+	set_schema=".interfaces.ICategorizableItemDescription"
+	/>
+  </class>
+
+  <utility
+      component=".categorizableitemdescription.categorizableItemDescriptionVocabulary"
+      name="quotationtool.categorization.categorizableitemdescription"
+      />
+
+
+  <interface
+      interface=".interfaces.ICategoriesContainer"
+      type="zope.app.content.interfaces.IContentType"
+      />
+
+  <class
+      class=".categoriescontainer.CategoriesContainer">
+    <implements
+        interface="zope.annotation.interfaces.IAttributeAnnotatable"
+	/>
+    <allow
+	interface="zope.container.interfaces.IReadContainer"
+	/>
+    <require
+	permission="quotationtool.categorization.AddCategory"
+	interface="zope.container.interfaces.IWriteContainer"
+	/>
+    <require
+	permission="quotationtool.categorization.AddCategory"
+	attributes="__update_order__"
+	/>
+  </class>
+
+  <subscriber
+      handler=".categoriescontainer.createCategoriesContainer"
+      />
+
+
+  <interface
+      interface=".interfaces.ICategorySet"
+      type="zope.app.content.interfaces.IContentType"
+      />
+  
+  <class
+      class=".categoryset.CategorySet"
+      >
+    <implements
+        interface="zope.annotation.interfaces.IAttributeAnnotatable"
+	/>
+    <allow
+	interface="zope.container.interfaces.IReadContainer"
+	/>
+    <require
+	permission="quotationtool.categorization.AddCategory"
+	interface="zope.container.interfaces.IWriteContainer"
+	/>
+    <allow
+	attributes="weight title description categorizable_items 
+		    mode inherit open_to_users complete"
+	/>
+    <require
+	permission="quotationtool.categorization.AddCategory"
+	set_attributes="weight title description categorizable_items 
+			mode inherit open_to_users complete"
+	/>
+    <require
+	permission="quotationtool.categorization.AddCategory"
+	attributes="__update_order__"
+	/>
+    <require
+	permission="quotationtool.categorization.DoAttribution"
+	interface=".interfaces.IAttributionInjection"
+	/>
+    <allow
+	interface=".interfaces.IAttributionQuery"
+	/>
+    <allow
+	interface=".interfaces.IAttributionTreeSet"
+	/>
+  </class>
+
+  <utility
+      component=".mode.modeVocabulary"
+      provides="zope.schema.interfaces.IVocabularyFactory"
+      name="quotationtool.categorization.mode"
+      />
+
+
+  <interface
+      interface=".interfaces.ICategory"
+      type="zope.app.content.interfaces.IContentType"
+      />
+
+  <class
+      class=".category.Category">
+    <implements
+        interface="zope.annotation.interfaces.IAttributeAnnotatable"
+	/>
+    <allow
+	interface=".interfaces.ICategory"
+	/>
+    <require
+	permission="quotationtool.categorization.AddCategory"
+	set_schema=".interfaces.ICategory"
+	/>
+    <require
+	permission="quotationtool.categorization.DoAttribution"
+	interface=".interfaces.IAttributionInjection"
+	/>
+    <allow
+	interface=".interfaces.IAttributionQuery"
+	/>
+    <allow
+	interface=".interfaces.IAttributionTreeSet"
+	/>
+  </class>
+
+  
+  <adapter
+      factory=".field.ExclusiveAttributionField"
+      provides=".interfaces.IExclusiveAttributionField"
+      />
+  <adapter
+      factory=".field.ExclusiveAttributionField"
+      provides=".interfaces.IAttributionField"
+      name="exclusive"
+      />
+
+  <adapter
+      factory=".field.NonExclusiveAttributionField"
+      provides=".interfaces.INonExclusiveAttributionField"
+      />
+  <adapter
+      factory=".field.NonExclusiveAttributionField"
+      provides=".interfaces.IAttributionField"
+      name="non-exclusive"
+      />
+
+  <adapter
+      factory=".datamanager.ExclusiveAttributionDataManager"
+      />
+
+  <adapter
+      factory=".datamanager.NonExclusiveAttributionDataManager"
+      />
+     
+                                     
+                                     
+
+  <!--include package=".browser"/-->
+
+</configure>

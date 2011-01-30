@@ -1,0 +1,39 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    i18n_domain="quotationtool">
+
+  <grant
+      permission="quotationtool.categorization.DoAttribution"
+      role="quotationtool.Member"
+      />
+
+  <grant
+      permission="quotationtool.categorization.DoAttribution"
+      role="quotationtool.Editor"
+      />
+
+
+  <grant
+      permission="quotationtool.categorization.AddCategory"
+      role="quotationtool.Member"
+      />
+
+  <grant
+      permission="quotationtool.categorization.AddCategory"
+      role="quotationtool.Editor"
+      />
+
+
+  <grant
+      permission="quotationtool.categorization.EditCategory"
+      role="quotationtool.Member"
+      />
+
+
+  <grant
+      permission="quotationtool.categorization.ManageCategorization"
+      role="quotationtool.Editor"
+      />
+
+
+</configure>

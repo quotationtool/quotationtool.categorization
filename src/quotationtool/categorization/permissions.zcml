@@ -1,0 +1,29 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    i18n_domain="quotationtool">
+
+  <permission
+      id="quotationtool.categorization.DoAttribution"
+      title="[do-attribution-permission-title]
+	     Attribute categories to an item."
+      />
+
+  <permission
+      id="quotationtool.categorization.AddCategory"
+      title="[add-category-permission-title] 
+	     Add a category or set of categories"
+      />
+
+  <permission
+      id="quotationtool.categorization.EditCategory"
+      title="[edit-category-permission-title]
+	     Edit categories"
+      />
+
+  <permission
+      id="quotationtool.categorization.ManageCategorization"
+      title="[manage-categorization-permission-title]
+	     Manage categorizations on a Zope3 level"
+      />
+      
+</configure>

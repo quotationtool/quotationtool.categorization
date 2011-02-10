@@ -113,11 +113,30 @@
       for="..interfaces.ICategorizable"
       title="[classification] Classification"
       name="classification"
+      class=".tabs.AttributionTab"
       permission="zope.View"
       layer="quotationtool.skin.interfaces.IQuotationtoolBrowserLayer"
       manager="quotationtool.skin.interfaces.IItemTabs"
       viewName="@@attribution.html"
       weight="310"
+      />
+  <zope:adapter
+      for="..interfaces.ICategorizable
+	   zope.publisher.interfaces.browser.IBrowserRequest
+	   .attribution.AttributionForm
+	   quotationtool.skin.interfaces.IItemTabs
+	   .tabs.IAttributionTab"
+      provides="z3c.menu.ready2go.interfaces.ISelectedChecker"
+      factory="z3c.menu.ready2go.checker.TrueSelectedChecker"
+      />
+  <zope:adapter
+      for="..interfaces.ICategorizable
+	   zope.publisher.interfaces.browser.IBrowserRequest
+	   .attribution.AttributionDisplayForm
+	   quotationtool.skin.interfaces.IItemTabs
+	   .tabs.IAttributionTab"
+      provides="z3c.menu.ready2go.interfaces.ISelectedChecker"
+      factory="z3c.menu.ready2go.checker.TrueSelectedChecker"
       />
     
 </configure>

@@ -18,7 +18,6 @@
       subMenuProviderName="categorizationsubnav"
       weight="100"
       />
-
   <zope:adapter
       factory="z3c.menu.ready2go.checker.TrueSelectedChecker"
       for="..interfaces.ICategoriesContainer
@@ -28,7 +27,6 @@
 	   .nav.ICategoriesContainerMainNavItem"
       provides="z3c.menu.ready2go.interfaces.ISelectedChecker"
       />
-
   <zope:adapter
       factory="z3c.menu.ready2go.checker.TrueSelectedChecker"
       for="..interfaces.ICategorySet
@@ -38,10 +36,27 @@
 	   .nav.ICategoriesContainerMainNavItem"
       provides="z3c.menu.ready2go.interfaces.ISelectedChecker"
       />
-
   <zope:adapter
       factory="z3c.menu.ready2go.checker.TrueSelectedChecker"
       for="..interfaces.ICategory
+	   quotationtool.skin.interfaces.IQuotationtoolBrowserLayer
+	   zope.interface.Interface
+	   quotationtool.skin.interfaces.IMainNav
+	   .nav.ICategoriesContainerMainNavItem"
+      provides="z3c.menu.ready2go.interfaces.ISelectedChecker"
+      />
+  <zope:adapter
+      factory="z3c.menu.ready2go.checker.TrueSelectedChecker"
+      for="..interfaces.ICategorizableItemDescriptions
+	   quotationtool.skin.interfaces.IQuotationtoolBrowserLayer
+	   zope.interface.Interface
+	   quotationtool.skin.interfaces.IMainNav
+	   .nav.ICategoriesContainerMainNavItem"
+      provides="z3c.menu.ready2go.interfaces.ISelectedChecker"
+      />
+  <zope:adapter
+      factory="z3c.menu.ready2go.checker.TrueSelectedChecker"
+      for="..interfaces.ICategorizableItemDescription
 	   quotationtool.skin.interfaces.IQuotationtoolBrowserLayer
 	   zope.interface.Interface
 	   quotationtool.skin.interfaces.IMainNav
@@ -73,11 +88,22 @@
       for="*"
       title="[catogoryset-add-navigation] Add Category Set"
       name="categoryset-add"
-      permission="zope.View"
+      permission="quotationtool.categorization.AddCategory"
       layer="quotationtool.skin.interfaces.IQuotationtoolBrowserLayer"
       manager=".nav.ICategorizationSubNav"
       viewName="categories/@@addCategorySet.html"
       weight="110"
       />
     
+  <z3c:siteMenuItem
+      for="*"
+      title="[catgorizableitemdescriptions-navigation] Categorizable Items"
+      name="categorizableitemdescriptions"
+      permission="quotationtool.categorization.ManageCategorization"
+      layer="quotationtool.skin.interfaces.IQuotationtoolBrowserLayer"
+      manager=".nav.ICategorizationSubNav"
+      viewName="categorizableitems/"
+      weight="200"
+      />
+  
 </configure>

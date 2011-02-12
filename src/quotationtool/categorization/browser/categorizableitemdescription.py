@@ -7,11 +7,19 @@ from zope.exceptions.interfaces import DuplicationError, UserError
 from zope.traversing.browser import absoluteURL
 from z3c.pagelet.browser import BrowserPagelet
 from zope.publisher.browser import BrowserView
+from zope.securitypolicy.interfaces import IPrincipalRoleManager
+
 
 _ = ReferatoryMessageFactory = MessageFactory('quotationtool')
 
 from quotationtool.categorization import interfaces
 from quotationtool.categorization.categorizableitemdescription import CategorizableItemDescription
+
+
+class LabelView(BrowserView):
+
+    def __call__(self):
+        return _('categorizableitemdescriptions-label', u"Categorizable items")
 
 
 class CategorizableItemDescriptionsContainerView(BrowserPagelet):
@@ -46,6 +54,15 @@ class AddCategorizableItemDescription(form.AddForm):
     def create(self, data):
         description = CategorizableItemDescription()
         form.applyChanges(self, description, data)
+
+        # Grant the current user the Edit permission by assigning him
+        # the quotationtool.Creator role, but only locally in the
+        # context of the newly created object.
+        manager = IPrincipalRoleManager(description)
+        manager.assignRoleToPrincipal(
+            'quotationtool.Creator',
+            self.request.principal.id)
+
         return description
 
     def add(self, obj):

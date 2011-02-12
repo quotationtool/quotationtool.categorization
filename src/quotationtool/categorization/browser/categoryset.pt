@@ -1,11 +1,7 @@
 <div i18n:domain="quotationtool" id="categoryset">
-  
-  <metal:macro use-macro="macro:subform-display">
-  </metal:macro>
-
 
   <h2 i18n:translate="">Categories</h2>
-      
+
   <table class="container-listing">
     <thead class="head">
       <tr>
@@ -27,25 +23,21 @@
       </tr>
     </thead>
     <tbody>
-      <tal:block repeat="category context/values">
-      <tr tal:condition="repeat/category/odd" class="odd">
-	<td>
-	  <a class="content-item"
-	     tal:attributes="href category/@@absolute_url"
-	     tal:content="category/title"/>
-	</td>
-	<td tal:content="category/description"/>
-	<td tal:content="category/weight"/>
-      </tr>
-      <tr tal:condition="repeat/category/even" class="even">
-	<td>
-	  <a class="content-item"
-	     tal:attributes="href category/@@absolute_url"
-	     tal:content="category/title"/>
-	</td>
-	<td tal:content="category/description"/>
-	<td tal:content="category/weight"/>
-      </tr>
+      <tal:block repeat="category view/categories">
+	<tr tal:condition="repeat/category/odd" class="odd">
+	  <metal:macro define-macro="category-item">
+	    <td>
+	      <a class="content-item"
+		 tal:attributes="href category/@@absolute_url"
+		 tal:content="category/title"/>
+	    </td>
+	    <td tal:content="category/description"/>
+	    <td tal:content="category/weight"/>
+	  </metal:macro>
+	</tr>
+	<tr tal:condition="repeat/category/even" class="even">
+	  <metal:macro use-macro="template/macros/category-item"/>
+	</tr>
       </tal:block>
     </tbody>
   </table>

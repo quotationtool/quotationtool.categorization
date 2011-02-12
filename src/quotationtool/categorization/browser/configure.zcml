@@ -8,6 +8,21 @@
 
   <!-- related to categorizable item description -->
 
+  <zope:view
+      for="..interfaces.ICategorizableItemDescriptions"
+      name="label"
+      type="quotationtool.skin.interfaces.IQuotationtoolBrowserLayer"
+      factory=".categorizableitemdescription.LabelView"
+      permission="zope.View"
+      />
+  <zope:view
+      for="..interfaces.ICategorizableItemDescription"
+      name="label"
+      type="quotationtool.skin.interfaces.IQuotationtoolBrowserLayer"
+      factory=".categorizableitemdescription.LabelView"
+      permission="zope.View"
+      />
+
   <z3c:pagelet
       for="..interfaces.ICategorizableItemDescriptions"
       name="index.html"
@@ -40,6 +55,14 @@
 
   <!-- related to categories-container -->
   
+  <zope:view
+      for="..interfaces.ICategoriesContainer"
+      name="label"
+      type="quotationtool.skin.interfaces.IQuotationtoolBrowserLayer"
+      factory=".categoriescontainer.LabelView"
+      permission="zope.View"
+      />
+
   <z3c:pagelet
       for="..interfaces.ICategoriesContainer"
       name="index.html"
@@ -56,6 +79,21 @@
 
   <!-- related to category set -->
 
+  <zope:view
+      for="..interfaces.ICategorySet"
+      name="details"
+      type="quotationtool.skin.interfaces.IQuotationtoolBrowserLayer"
+      factory=".categoryset.DetailsView"
+      permission="zope.View"
+      />
+  <zope:view
+      for="..interfaces.ICategorySet"
+      name="label"
+      type="quotationtool.skin.interfaces.IQuotationtoolBrowserLayer"
+      factory=".categoryset.LabelView"
+      permission="zope.View"
+      />
+
   <z3c:pagelet
       for="..interfaces.ICategoriesContainer"
       name="addCategorySet.html"
@@ -67,12 +105,12 @@
   <z3c:pagelet
       for="..interfaces.ICategorySet"
       name="index.html"
-      class=".categoryset.CategorySetContainerView"
+      class=".categoryset.CategorySetContainerPagelet"
       layer="quotationtool.skin.interfaces.IQuotationtoolBrowserLayer"
       permission="zope.View"
       />
   <z3c:template
-      for=".categoryset.CategorySetContainerView"
+      for=".categoryset.CategorySetContainerPagelet"
       template="categoryset.pt"
       layer="quotationtool.skin.interfaces.IQuotationtoolBrowserLayer"
       />
@@ -101,6 +139,21 @@
 
   <!-- related to category -->
 
+  <zope:view
+      for="..interfaces.ICategory"
+      name="details"
+      type="quotationtool.skin.interfaces.IQuotationtoolBrowserLayer"
+      factory=".category.DetailsView"
+      permission="zope.View"
+      />
+  <zope:view
+      for="..interfaces.ICategory"
+      name="label"
+      type="quotationtool.skin.interfaces.IQuotationtoolBrowserLayer"
+      factory=".category.LabelView"
+      permission="zope.View"
+      />
+
   <z3c:pagelet
       for="..interfaces.ICategorySet"
       name="addCategory.html"
@@ -112,10 +165,16 @@
   <z3c:pagelet
       for="..interfaces.ICategory"
       name="index.html"
-      class=".category.DisplayCategory"
+      class=".category.CategoriesPagelet"
       layer="quotationtool.skin.interfaces.IQuotationtoolBrowserLayer"
       permission="zope.View"
       />
+  <z3c:template
+      for=".category.CategoriesPagelet"
+      template="categoryset.pt"
+      layer="quotationtool.skin.interfaces.IQuotationtoolBrowserLayer"
+      />
+  
 
   <z3c:pagelet
       for="..interfaces.ICategory"

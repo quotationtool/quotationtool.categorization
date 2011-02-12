@@ -1,17 +1,47 @@
 import zope.component
 from z3c.formui import form
 from z3c.form import field
+from z3c.form.form import DisplayForm
 from zope.traversing.browser import absoluteURL
 from zope.i18nmessageid import MessageFactory
 from zope.publisher.browser import BrowserView
 from zope.app.pagetemplate.viewpagetemplatefile import ViewPageTemplateFile
+from zope.securitypolicy.interfaces import IPrincipalRoleManager
+from z3c.pagelet.browser import BrowserPagelet
 
 from quotationtool.categorization.category import Category
 from quotationtool.categorization import interfaces
 from quotationtool.skin.interfaces import ITabbedContentLayout
 
+
 _ = MessageFactory('quotationtool')
 contentMsg = MessageFactory('quotationtool.categorization.content')
+
+
+
+class DetailsView(DisplayForm):
+    """Display a category object.
+    """
+
+    label = _('category-details-label',
+              u"Category")
+
+    fields = field.Fields(interfaces.ICategory).omit(
+        '__name__', '__parent__','items_weight_attribute')
+
+    def __call__(self):
+        self.update()
+        return self.render()
+
+
+class LabelView(BrowserView):
+    """ The label of a category."""
+    
+    def __call__(self):
+        return _('category-label',
+                 u"Category: $CATEGORY",
+                 mapping = {'CATEGORY': self.context.__name__},
+                 )
 
 
 class AddCategory(form.AddForm):
@@ -41,6 +71,15 @@ class AddCategory(form.AddForm):
     def create(self, data):
         category = Category()
         form.applyChanges(self, category, data)
+
+        # Grant the current user the Edit permission by assigning him
+        # the quotationtool.Creator role, but only locally in the
+        # context of the newly created object.
+        manager = IPrincipalRoleManager(category)
+        manager.assignRoleToPrincipal(
+            'quotationtool.Creator',
+            self.request.principal.id)
+
         return category
 
     def add(self, category):
@@ -57,9 +96,6 @@ class AddCategory(form.AddForm):
 
 class EditCategory(form.EditForm):
     """Edit a category object.
-
-
-
     """
 
     zope.interface.implements(ITabbedContentLayout)
@@ -71,17 +107,12 @@ class EditCategory(form.EditForm):
         '__name__', '__parent__','items_weight_attribute')    
 
 
-class DisplayCategory(form.DisplayForm):
-    """Display a category object.
-
-
-
+class CategoriesPagelet(BrowserPagelet):
+    """ Show the other categories of the set.
     """
 
     zope.interface.implements(ITabbedContentLayout)
 
-    label = _('category-display-label',
-              u"Category")
-
-    fields = field.Fields(interfaces.ICategory).omit(
-        '__name__', '__parent__','items_weight_attribute')
+    def categories(self):
+        return self.context.__parent__.values()
+        

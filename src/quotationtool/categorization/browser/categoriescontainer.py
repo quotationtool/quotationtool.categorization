@@ -5,6 +5,13 @@ from zope.publisher.browser import BrowserView
 from zope.app.pagetemplate.viewpagetemplatefile import ViewPageTemplateFile
 
 from quotationtool.categorization import interfaces
+from quotationtool.categorization.interfaces import _
+
+
+class LabelView(BrowserView):
+
+    def __call__(self):
+        return _('categoriescontainer-label', u"Classification")
 
 
 class CategoriesContainerContainerView(BrowserPagelet):

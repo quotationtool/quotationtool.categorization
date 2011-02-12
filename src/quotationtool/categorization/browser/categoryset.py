@@ -2,12 +2,14 @@ import zope.interface
 import zope.component
 from z3c.formui import form
 from z3c.form import field
+from z3c.form.form import DisplayForm as DisplayFormView
 from zope.traversing.browser import absoluteURL
 from zope.exceptions.interfaces import UserError
 from z3c.pagelet.browser import BrowserPagelet
 from zope.i18nmessageid import MessageFactory
 from zope.app.pagetemplate.viewpagetemplatefile import ViewPageTemplateFile
 from zope.publisher.browser import BrowserView
+from zope.securitypolicy.interfaces import IPrincipalRoleManager
 
 from quotationtool.categorization import interfaces
 from quotationtool.categorization.categoryset import CategorySet
@@ -16,6 +18,28 @@ from quotationtool.skin.interfaces import ITabbedContentLayout
 
 _ = MessageFactory('quotationtool')
 contentMsg = MessageFactory('quotationtool.categorization.content')
+
+
+class DetailsView(DisplayFormView):
+
+    label = _('categoryset-details-label',
+              u"Category Set")
+
+    fields = field.Fields(interfaces.ICategorySet).omit(
+        '__name__', '__parent__', 'items_weight_attribute')
+
+    def __call__(self):
+        self.update()
+        return self.render()
+
+
+class LabelView(BrowserView):
+    
+    def __call__(self):
+        return _('categoryset-label',
+                 u"Category Set: $CATEGORYSET",
+                 mapping = {'CATEGORYSET': self.context.__name__},
+                 )
 
 
 class AddCategorySet(form.AddForm):
@@ -67,6 +91,15 @@ class AddCategorySet(form.AddForm):
     def create(self, data):
         category_set = CategorySet()
         form.applyChanges(self, category_set, data)
+
+        # Grant the current user the Edit permission by assigning him
+        # the quotationtool.Creator role, but only locally in the
+        # context of the newly created object.
+        manager = IPrincipalRoleManager(category_set)
+        manager.assignRoleToPrincipal(
+            'quotationtool.Creator',
+            self.request.principal.id)
+
         return category_set
 
     def add(self, category_set):
@@ -95,16 +128,13 @@ class EditCategorySet(form.EditForm):
     fields['mode'].widgetFactory = ExclusiveAttributionFieldWidget
 
 
-class CategorySetContainerView(form.DisplayForm):
+class CategorySetContainerPagelet(BrowserPagelet):
     """A view that lists the contained objects in a category set."""
 
     zope.interface.implements(ITabbedContentLayout)
 
-    label = _('categoryset-display-label',
-              u"Category Set")
-
-    fields = field.Fields(interfaces.ICategorySet).omit(
-        '__name__', '__parent__', 'items_weight_attribute')
+    def categories(self):
+        return self.context.values()
 
 
 class CategorySetAttributions(BrowserPagelet):

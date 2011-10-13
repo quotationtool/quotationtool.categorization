@@ -20,7 +20,15 @@ _ = MessageFactory('quotationtool')
 contentMsg = MessageFactory('quotationtool.categorization.content')
 
 
-class DetailsView(DisplayFormView):
+class DetailsView(BrowserView):
+
+    template = ViewPageTemplateFile('categoryset_details.pt')
+
+    def __call__(self):
+        return self.template()
+
+
+class DetailsViewOFF(DisplayFormView):
 
     label = _('categoryset-details-label',
               u"Category Set")

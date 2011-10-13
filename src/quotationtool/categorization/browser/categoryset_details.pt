@@ -1,0 +1,71 @@
+<div i18n:domain="quotationtool">
+  <table class="schema-view">
+    <tr>
+      <td class="schema-col">
+	<tal:block define="schema modules/quotationtool/categorization/interfaces/ICategorySet/title">
+          <span metal:define-macro="schema_info" class="schema-info">
+            <span class="title" tal:content="schema/title | nothing"
+                  >Title</span
+                  ><span class="required" tal:condition="schema/required | nothing"
+                  >*</span
+                  ><tal:block condition="schema/description | nothing"
+                  ><br
+                  /><span class="description" tal:content="schema/description"
+                  >Description</span
+                  ></tal:block>
+          </span>  
+        </tal:block>
+      </td>
+      <td tal:content="context/title | nothing">...</td>
+    </tr>
+    <tr>
+      <td class="schema-col"
+	  tal:define="schema modules/quotationtool/categorization/interfaces/ICategorySet/description">
+	<metal:block use-macro="template/macros/schema_info"/>
+      </td>
+      <td tal:content="context/description | nothing">...</td>
+    </tr>
+    <tr>
+      <td class="schema-col"
+	  tal:define="schema modules/quotationtool/categorization/interfaces/ICategorySet/categorizable_items">
+	<metal:block use-macro="template/macros/schema_info"/>
+      </td>
+      <td tal:content="context/categorizable_items | nothing">...</td>
+    </tr>
+    <tr>
+      <td class="schema-col"
+	  tal:define="schema modules/quotationtool/categorization/interfaces/ICategorySet/mode">
+	<metal:block use-macro="template/macros/schema_info"/>
+      </td>
+      <td tal:content="context/mode | nothing">...</td>
+    </tr>
+    <tr>
+      <td class="schema-col"
+	  tal:define="schema modules/quotationtool/categorization/interfaces/ICategorySet/inherit">
+	<metal:block use-macro="template/macros/schema_info"/>
+      </td>
+      <td tal:content="context/inherit | nothing">...</td>
+    </tr>
+    <tr>
+      <td class="schema-col"
+	  tal:define="schema modules/quotationtool/categorization/interfaces/ICategorySet/open_to_users">
+	<metal:block use-macro="template/macros/schema_info"/>
+      </td>
+      <td tal:content="context/open_to_users | nothing">...</td>
+    </tr>
+    <tr>
+      <td class="schema-col"
+	  tal:define="schema modules/quotationtool/categorization/interfaces/ICategorySet/complete">
+	<metal:block use-macro="template/macros/schema_info"/>
+      </td>
+      <td tal:content="context/complete | nothing">...</td>
+    </tr>
+    <tr>
+      <td class="schema-col"
+	  tal:define="schema modules/quotationtool/categorization/interfaces/ICategorySet/weight">
+	<metal:block use-macro="template/macros/schema_info"/>
+      </td>
+      <td tal:content="context/weight | nothing">...</td>
+    </tr>
+  </table>
+</div>

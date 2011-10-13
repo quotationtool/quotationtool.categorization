@@ -1,0 +1,45 @@
+<div i18n:domain="quotationtool">
+  <table class="schema-view">
+    <tr>
+      <td class="schema-col">
+	<tal:block define="schema modules/quotationtool/categorization/interfaces/ICategory/title">
+          <span metal:define-macro="schema_info" class="schema-info">
+            <span class="title" tal:content="schema/title | nothing"
+                  >Title</span
+                  ><span class="required" tal:condition="schema/required | nothing"
+                  >*</span
+                  ><tal:block condition="schema/description | nothing"
+                  ><br
+                  /><span class="description" tal:content="schema/description"
+                  >Description</span
+                  ></tal:block>
+          </span>  
+        </tal:block>
+      </td>
+      <td tal:content="context/title | nothing">...</td>
+    </tr>
+    <tr>
+      <td class="schema-col"
+	  tal:define="schema modules/quotationtool/categorization/interfaces/ICategory/description">
+	<metal:block use-macro="template/macros/schema_info"/>
+      </td>
+      <td tal:content="context/description | nothing">...</td>
+    </tr>
+    <tr>
+      <td class="schema-col"
+	  tal:define="schema modules/quotationtool/categorization/interfaces/ICategory/weight">
+	<metal:block use-macro="template/macros/schema_info"/>
+      </td>
+      <td tal:content="context/weight | nothing">...</td>
+    </tr>
+    <tr>
+      <td class="schema-col">
+	<span class="title" i18n:translate="">Contained in Category Set</span>
+      </td>
+      <td><a href=".."
+	     tal:attributes="href string:${context/__parent__/@@absolute_url}"
+	     tal:content="context/__parent__/__name__">...</a>
+      </td>
+    </tr>
+  </table>
+</div>

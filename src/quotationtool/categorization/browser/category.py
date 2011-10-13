@@ -18,8 +18,15 @@ _ = MessageFactory('quotationtool')
 contentMsg = MessageFactory('quotationtool.categorization.content')
 
 
+class DetailsView(BrowserView):
 
-class DetailsView(DisplayForm):
+    template = ViewPageTemplateFile('category_details.pt')
+
+    def __call__(self):
+        return self.template()
+
+
+class DetailsViewOFF(DisplayForm):
     """Display a category object.
     """
 
@@ -39,8 +46,9 @@ class LabelView(BrowserView):
     
     def __call__(self):
         return _('category-label',
-                 u"Category: $CATEGORY",
-                 mapping = {'CATEGORY': self.context.__name__},
+                 u"Category Set: $CATEGORYSET --> Category: $CATEGORY",
+                 mapping = {'CATEGORYSET': self.context.__parent__.__name__,
+                            'CATEGORY': self.context.__name__},
                  )
 
 

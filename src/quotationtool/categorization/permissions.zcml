@@ -3,6 +3,12 @@
     i18n_domain="quotationtool">
 
   <permission
+      id="quotationtool.categorization.Read"
+      title="[read-categorization-permission-title]
+	     Read categorization related things."
+      />
+
+  <permission
       id="quotationtool.categorization.DoAttribution"
       title="[do-attribution-permission-title]
 	     Attribute categories to an item."

@@ -28,7 +28,7 @@
       name="index.html"
       class=".categorizableitemdescription.CategorizableItemDescriptionsContainerView"
       layer="quotationtool.skin.interfaces.IQuotationtoolBrowserLayer"
-      permission="zope.View"
+      permission="quotationtool.categorization.Read"
       />
   <z3c:template
       for=".categorizableitemdescription.CategorizableItemDescriptionsContainerView"
@@ -68,7 +68,7 @@
       name="index.html"
       class=".categoriescontainer.CategoriesContainerContainerView"
       layer="quotationtool.skin.interfaces.IQuotationtoolBrowserLayer"
-      permission="zope.View"
+      permission="quotationtool.categorization.Read"
       />
   <z3c:template
       for=".categoriescontainer.CategoriesContainerContainerView"
@@ -107,7 +107,7 @@
       name="index.html"
       class=".categoryset.CategorySetContainerPagelet"
       layer="quotationtool.skin.interfaces.IQuotationtoolBrowserLayer"
-      permission="zope.View"
+      permission="quotationtool.categorization.Read"
       />
   <z3c:template
       for=".categoryset.CategorySetContainerPagelet"
@@ -128,7 +128,7 @@
       name="attributions.html"
       class=".categoryset.CategorySetAttributions"
       layer="quotationtool.skin.interfaces.IQuotationtoolBrowserLayer"
-      permission="zope.View"
+      permission="quotationtool.categorization.Read"
       />
   <z3c:template
       for=".categoryset.CategorySetAttributions"
@@ -167,7 +167,7 @@
       name="index.html"
       class=".category.CategoriesPagelet"
       layer="quotationtool.skin.interfaces.IQuotationtoolBrowserLayer"
-      permission="zope.View"
+      permission="quotationtool.categorization.Read"
       />
   <z3c:template
       for=".category.CategoriesPagelet"
@@ -215,7 +215,7 @@
       name="attribution.html"
       class=".attribution.AttributionDisplayForm"
       layer="quotationtool.skin.interfaces.IQuotationtoolBrowserLayer"
-      permission="zope.View"
+      permission="quotationtool.categorization.Read"
       />
   <z3c:template
       for=".attribution.AttributionDisplayForm"

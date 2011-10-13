@@ -3,6 +3,26 @@
     i18n_domain="quotationtool">
 
   <grant
+      permission="quotationtool.categorization.Read"
+      role="quotationtool.Visitor"
+      />
+
+  <grant
+      permission="quotationtool.categorization.Read"
+      role="quotationtool.Member"
+      />
+
+  <grant
+      permission="quotationtool.categorization.Read"
+      role="quotationtool.Editor"
+      />
+
+  <grant
+      permission="quotationtool.categorization.Read"
+      role="quotationtool.Manager"
+      />
+
+  <grant
       permission="quotationtool.categorization.DoAttribution"
       role="quotationtool.Member"
       />
@@ -33,6 +53,11 @@
   <grant
       permission="quotationtool.categorization.ManageCategorization"
       role="quotationtool.Editor"
+      />
+
+  <grant
+      permission="quotationtool.categorization.ManageCategorization"
+      role="quotationtool.Manager"
       />
 
 

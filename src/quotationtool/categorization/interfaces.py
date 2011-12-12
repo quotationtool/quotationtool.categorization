@@ -6,7 +6,7 @@ from zope.i18nmessageid import MessageFactory
 
 _ = MessageFactory('quotationtool')
 
-
+    
 class ICategorizable(zope.interface.Interface):
     """A marker interface for classes that are categorizable."""
 
@@ -177,6 +177,41 @@ class ICategoriesContainer(IWeightedItemsContainer):
 class ICategoryAddedEvent(zope.component.interfaces.IObjectEvent):
     """Indictes that a new category (= object implementing ICategory)
     has been created."""
+
+
+class IDoAttribution(zope.interface.Interface):
+    """ DO/write an attribution on a categorizable item."""
+
+    def setAttributes(_set, categories):
+        """ Attribute categories from set to categorizable item."""
+
+    def unsetAttributes(_set, categories):
+        """ Remove categories of set from attribution to categorizable
+        item."""
+
+    def resetAttribution(_set):
+        """ Remove all categories of set from attribution to
+        categorizable item."""
+
+
+class IQueryAttribution(zope.interface.Interface):
+    """ Query/read the attribution on a categorizable item."""
+
+    def isAttributed(_set, category):
+        """ Returns true if and only if category from set was attributed."""
+
+    def getAttribution(_set):
+        """ Returns an iterator on attributed categories of the given set."""
+
+    def getAttributions():
+        """ Returns a dictory where keys are set names and values are
+        lists of attributed categories."""
+        
+
+class IAttribution(IDoAttribution, IQueryAttribution):
+    """ To be provided by an adapter for categorizable item.
+
+    """
 
 
 class IAttributionInjection(zope.interface.Interface):

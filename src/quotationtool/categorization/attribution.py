@@ -2,61 +2,69 @@ import zope.interface
 import zope.component
 import BTrees
 from zope.annotation import factory
+from persistent import Persistent
+import BTrees.OOBTree
 
 import interfaces
 
 
+def attributionValue(value):
+    return int(bool(value))
+
+
 ATTRIBUTION_KEY = 'quotationtool.categorization.attribution'
 
-class AttributionAnnotation(BTreeContainer):
+class AttributionAnnotation(Persistent):
+    """ An attribution implemented as a persistent annotation to
+    ICategorizable objects.
+
+    """
 
     zope.interface.implements(interfaces.IAttribution)
-    zope.component.adapts(interface.ICategorizable)
+    zope.component.adapts(interfaces.ICategorizable)
 
     __name__ = __parent__ = None
 
-    def _ensureCategoryClass(self, klas):
-        if not klas.__name__ in self:
-            self[klas.__name__] = BTreeContainer()
+    __attributions = {}
 
-    def setAttributes(self, klas, categories):
-        self._ensureCategoryClass(klas)
-        for category in categories:
-            self[klas.__name__][category.__name__] = 1
-            
-    def unsetAttributes(self, klas, categories):
-        self._ensureCategoryClass(klas)
-        for category in categories:
-            self[klas.__name__][category.__name__] = 0
+    def __init__(self):
+        self.__attributions = self._newAttributionData()
 
-    def resetAttribution(self, klas):
-        self._ensureCategoryClass(klas)
-        for category in klas.keys():
-            self[klas.__name][category] = 0
+    def _newAttributionData(self):
+        return BTrees.family32.OO.TreeSet()
 
-    def isAttributed(self, klas, category):
-        self._ensureCategoryClass(klas)
-        if category.__name in self[klas.__name__]:
-            return self[klas.__name][category.__name__] == 1
-        return False
+    def isAttributed(self, category_name):
+        """ see IQueryAttribution"""
+        return attributionValue(self.__attributions.has_key(category_name))
+        
+    @property
+    def attributions(self):
+        """ See IQueryAttribution"""
+        return self.__attributions.keys()
 
-    def getAttribution(self, klas):
-        for name, category in klas.items():
-            if self.isAttributed(klas, category):
-                yield category
-            
-    def getAttributions(self):
-        ut = zope.component.getUtility(
-            interfaces.ICategoriesContainer,
-            context=self)
-        d = {}
-        for name, klas in ut.items():
-            d[name] = list(self.getAttribution(klas))
-        return d
+    def attribute(self, **kwargs):
+        """ See IDoAttribution"""
+        # TODO: reset all?
+        for name, value in kwargs.items():
+            if attributionValue(value):
+                if not self.__attributions.has_key(name):
+                    self.__attributions.insert(name)
+            else:
+                if self.__attributions.has_key(name):
+                    self.__attributions.remove(name)
+
+    def clear(self):
+        """ See IDoAttribution"""
+        self.__attributions.clear()
+
 
 attribution_factory = factory(AttributionAnnotation, ATTRIBUTION_KEY)
 
 
+
+
+
+#BBB: will be removed
 class Attribution(object):
     """A mixin class which implements the attribution-api relevant
     interfaces."""

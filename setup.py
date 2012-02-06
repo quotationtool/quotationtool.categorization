@@ -64,6 +64,8 @@ setup(
         'zope.location',
         'zope.site',
         'zope.keyreference',
+        'z3c.indexer',
+        'z3c.searcher',
 
         'z3c.template',
         'z3c.macro',

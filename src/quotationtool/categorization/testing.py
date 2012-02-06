@@ -58,12 +58,12 @@ class DummyIntIds(object):
         return self.refs.iterkeys()
 
     def getObject(self, id):
-        return self.refs[id]()
+        return self.refs[id]
 
     def queryObject(self, id, default=None):
         r = self.refs.get(id)
         if r is not None:
-            return r()
+            return r
         return default
 
     def getId(self, ob):

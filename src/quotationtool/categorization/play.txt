@@ -1,0 +1,127 @@
+>>> from zope.site.folder import rootFolder
+>>> root = rootFolder()
+
+>>> def log_event(event):
+...     print(event)
+>>> import zope.event
+>>> zope.event.subscribers.append(log_event)
+
+>>> from quotationtool.categorization import interfaces
+>>> from quotationtool.categorization.categoriescontainer import CategoriesContainer
+>>> from quotationtool.categorization.categoryset import CategorySet
+>>> from quotationtool.categorization.category import Category
+
+>>> categories = CategoriesContainer()
+>>> zope.component.provideUtility(categories, interfaces.ICategoriesContainer)
+
+>>> categories['s1'] = s1 = CategorySet()
+<zope.lifecycleevent.ObjectAddedEvent object at 0x...>
+<zope.container.contained.ContainerModifiedEvent object at 0x...>
+
+>>> categories['s2'] = s2 = CategorySet()
+<zope.lifecycleevent.ObjectAddedEvent object at 0x...>
+<zope.container.contained.ContainerModifiedEvent object at 0x...>
+
+>>> categories['s1']['c11'] = c11 = Category()
+<zope.lifecycleevent.ObjectAddedEvent object at 0x...>
+<zope.container.contained.ContainerModifiedEvent object at 0x...>
+
+>>> categories['s1']['c12'] = c12 = Category()
+<zope.lifecycleevent.ObjectAddedEvent object at 0x...>
+<zope.container.contained.ContainerModifiedEvent object at 0x...>
+
+>>> categories['s1']['c13'] = c13 = Category()
+<zope.lifecycleevent.ObjectAddedEvent object at 0x...>
+<zope.container.contained.ContainerModifiedEvent object at 0x...>
+
+>>> categories['s1']['c14'] = c14 = Category()
+<zope.lifecycleevent.ObjectAddedEvent object at 0x...>
+<zope.container.contained.ContainerModifiedEvent object at 0x...>
+
+>>> categories.getCategory('c11') is c11
+True
+
+>>> from zope.copypastemove.interfaces import IContainerItemRenamer
+>>> renamer = IContainerItemRenamer(categories.getCategory('c11').__parent__)
+>>> renamer.renameItem('c11', 'm11')
+<zope.lifecycleevent.ObjectMovedEvent object at 0x...>
+<zope.container.contained.ContainerModifiedEvent object at 0x...>
+<zope.container.contained.ContainerModifiedEvent object at 0x...>
+
+>>> categories.getCategory('c11') is None
+True
+
+>>> categories.getCategory('m11') is c11
+True
+
+>>> from zope.copypastemove.interfaces import IObjectMover
+>>> mover = IObjectMover(categories.getCategory('c13'))
+>>> mover.moveTo(categories['s2'], 'c21')
+<zope.lifecycleevent.ObjectMovedEvent object at 0x...>
+<zope.container.contained.ContainerModifiedEvent object at 0x...>
+<zope.container.contained.ContainerModifiedEvent object at 0x...>
+u'c21'
+
+>>> categories.getCategory('c13') is None
+True
+
+>>> categories.getCategory('c21') is c13
+True
+
+
+>>> s1.keys()
+[u'c12', u'c14', u'm11']
+
+>>> c11.weight = 5
+>>> c12.weight = 7
+>>> c13.weight = 1
+>>> c14.weight = 3
+
+>>> s1.keys()
+[u'c12', u'c14', u'm11']
+
+>>> [c.weight for c in s1.values()]
+[7, 3, 5]
+
+That is because weight was not set before adding.
+
+>>> from zope.lifecycleevent import modified
+>>> modified(c11)
+<zope.lifecycleevent.ObjectModifiedEvent object at 0x...>
+>>> s1.keys()
+[u'c14', u'm11', u'c12']
+
+
+>>> from persistent import Persistent
+>>> from zope.annotation.interfaces import IAttributeAnnotatable
+>>> import zope.interface
+>>> 
+
+
+>>> from zope.container.sample import SampleContainer
+>>> from zope.container.btree import BTreeContainer
+>>> from zope.container.contained import Contained
+>>> container = BTreeContainer()
+
+>>> container['o1'] = Contained()
+<zope.lifecycleevent.ObjectAddedEvent object at 0x...>
+<zope.container.contained.ContainerModifiedEvent object at 0x...>
+
+>>> container['m1'] = container['o1']
+<zope.lifecycleevent.ObjectMovedEvent object at 0x...>
+<zope.container.contained.ContainerModifiedEvent object at 0x...>
+
+>>> del container['o1']
+<zope.container.contained.ContainerModifiedEvent object at 0x...>
+
+>>> renamer = IContainerItemRenamer(container)
+>>> renamer.renameItem('m1', 'moved1')
+<zope.lifecycleevent.ObjectMovedEvent object at 0x...>
+<zope.container.contained.ContainerModifiedEvent object at 0x...>
+<zope.container.contained.ContainerModifiedEvent object at 0x...>
+
+
+
+
+>>> zope.event.subscribers.remove(log_event)
+

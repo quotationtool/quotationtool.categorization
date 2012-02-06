@@ -84,8 +84,23 @@
 	permission="quotationtool.categorization.AddCategory"
 	attributes="__update_order__"
 	/>
+    <allow
+	attributes="getCategory"
+	/>
+    <require
+	attributes="addCategory removeCategory"
+	permission="quotationtool.categorization.AddCategory"
+	/>
   </class>
-
+  <subscriber
+      handler=".categoriescontainer.addCategorySubscriber"
+      />
+  <subscriber
+      handler=".categoriescontainer.removeCategorySubscriber"
+      />
+  <subscriber
+      handler=".categoriescontainer.moveCategorySubscriber"
+      />
   <subscriber
       handler=".categoriescontainer.createCategoriesContainer"
       />
@@ -199,7 +214,18 @@
       factory=".datamanager.NonExclusiveAttributionDataManager"
       />
      
-                                     
+  <!-- indexing attributions -->
+
+  <adapter
+      for=".interfaces.ICategorizable"
+      provides="z3c.indexer.interfaces.IIndexer"
+      name="attribution-set"
+      factory=".indexer.AttributionIndexer"
+      />
+
+  <subscriber
+      handler=".indexer.createAttributionIndex"/>
+
                                      
 
   <include package=".browser"/>

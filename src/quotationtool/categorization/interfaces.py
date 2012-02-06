@@ -1,7 +1,10 @@
 import zope.interface
 import zope.schema
+import zope.component
 from zope.container.interfaces import IContained, IContainer
+from zope.container.interfaces import INameChooser
 from zope.container.constraints import containers, contains
+from zope.app.component.hooks import getSite
 from zope.i18nmessageid import MessageFactory
 
 _ = MessageFactory('quotationtool')
@@ -72,10 +75,60 @@ class IWeightedItem(zope.interface.Interface):
         )
 
 
+class ICategoriesContainer(IWeightedItemsContainer):
+    """A container for all the category things."""
+
+    contains('.ICategorySet')
+
+    def getCategory(name, default=None):
+        """ Returns the category with the unique name given by the
+        parameter name. Returns default if not present.
+        """
+    def addCategory(name, category):
+        """ Add a category to the containers category index."""
+
+    def removeCategory(name):
+        """ Remove the category given by its name from the index.""" 
+
+
+def checkCategoryName(name):
+    #taken from namechooser
+    if isinstance(name, str):
+        name = unicode(name)
+    elif not isinstance(name, unicode):
+        raise TypeError("Invalid name type", type(name))
+    #taken from namechooser
+    if not name:
+        raise ValueError(
+            _("An empty name was provided. Names cannot be empty.")
+            )
+    #taken from namechooser
+    if name[:1] in '+@' or '/' in name:
+        raise ValueError(
+            _("Names cannot begin with '+' or '@' or contain '/'")
+            )
+    #check if already in use
+    container = zope.component.getUtility(
+        ICategoriesContainer, context=getSite())
+    if container.getCategory(name):
+        raise KeyError(
+            _("The given name is already being used")
+            )
+    return True
+
+
 class ICategory(IContained, IWeightedItem):
     """A category."""
 
     containers('.ICategorySet')
+
+    __name__ = zope.schema.TextLine(
+        title=_('icategory-name-title', u"ID"),
+        description=_('icategory-name-desc', u"Unique identifier of the category, where 'unique' means unique within the setunion of all category sets."),
+        required=True,
+        default=None,
+        constraint=checkCategoryName,
+        )
 
     title = zope.schema.TextLine(
         title = _('icategory-title-title',
@@ -168,80 +221,41 @@ class ICategorySet(IWeightedItemsContainer, IWeightedItem):
         )
 
 
-class ICategoriesContainer(IWeightedItemsContainer):
-    """A container for all the category stuff."""
-
-    contains(ICategorySet)
-
-
 class ICategoryAddedEvent(zope.component.interfaces.IObjectEvent):
-    """Indictes that a new category (= object implementing ICategory)
+    """Indicates that a new category (= object implementing ICategory)
     has been created."""
 
+
+class ICategoryRemovedEvent(zope.component.interfaces.IObjectEvent):
+    """Indicates that a category was removed."""
 
 class IDoAttribution(zope.interface.Interface):
     """ DO/write an attribution on a categorizable item."""
 
-    def setAttributes(_set, categories):
-        """ Attribute categories from set to categorizable item."""
+    def attribute(**kwargs):
+        """ Attribute categories from set to categorizable item.
+        
+        **kwargs gives category names and boolean attribution
+          values."""
 
-    def unsetAttributes(_set, categories):
-        """ Remove categories of set from attribution to categorizable
+    def clear():
+        """ Remove all categories from attribution to categorizable
         item."""
-
-    def resetAttribution(_set):
-        """ Remove all categories of set from attribution to
-        categorizable item."""
 
 
 class IQueryAttribution(zope.interface.Interface):
     """ Query/read the attribution on a categorizable item."""
 
-    def isAttributed(_set, category):
-        """ Returns true if and only if category from set was attributed."""
+    def isAttributed(category_name):
+        """ Returns true if and only if category was attributed."""
 
-    def getAttribution(_set):
-        """ Returns an iterator on attributed categories of the given set."""
-
-    def getAttributions():
-        """ Returns a dictory where keys are set names and values are
-        lists of attributed categories."""
+    attributions = zope.interface.Attribute(""" Returns the list of the names of those categories, that were attributed.""")
         
 
 class IAttribution(IDoAttribution, IQueryAttribution):
     """ To be provided by an adapter for categorizable item.
 
     """
-
-
-class IAttributionInjection(zope.interface.Interface):
-    """Injection part of the Attribution-API."""
-
-    def attribute_doc(docid, doc):
-        """Attribute category to the document identified by integer
-        ID."""
-
-    def unattribute_doc(docid):
-        """Revocate attribution of the category from the document
-        identified by its ID."""
-
-    def clearAttribution():
-        """Forget stored attributions!"""
-
-
-class IAttributionQuery(zope.interface.Interface):
-    """Query part of the Attribution-API."""
-    
-    def isAttributed(docid):
-        """Returns True if category was attributed to document, else
-        returns False."""
-
-
-class IAttributionTreeSet(zope.interface.Interface):
-    """Exposes the TreeSet for intersections and set unions."""
-
-    attribution = zope.interface.Attribute(
-        """An IITreeSet storing attributions.""")
 
 
 class IAttributionField(zope.schema.interfaces.IField):
@@ -289,20 +303,33 @@ AttributionValueField = zope.schema.Tuple(
     )
 
 
-class IAttribution(zope.interface.Interface):
-    """The (annotation) data of a categorized object."""
+
+### BBB: will be removed
+class IAttributionInjection(zope.interface.Interface):
+    """Injection part of the Attribution-API."""
+
+    def attribute_doc(docid, doc):
+        """Attribute category to the document identified by integer
+        ID."""
+
+    def unattribute_doc(docid):
+        """Revocate attribution of the category from the document
+        identified by its ID."""
+
+    def clearAttribution():
+        """Forget stored attributions!"""
+
+
+class IAttributionQuery(zope.interface.Interface):
+    """Query part of the Attribution-API."""
     
-    attibution = zope.schema.Dict(
-        title = _('iattribution-attribution-title',
-                  u"Attribution"),
-        description = _('iattribution-attribution-desc',
-                        u"Attribute categories to item."),
-        default = {},
-        key_type = AttributionKeyField,
-        value_type = AttributionValueField,
-        )
-        
-    @zope.interface.invariant
-    def checkAttribution(inst):
-        """Check if attribution is valid."""
-        
+    def isAttributed(docid):
+        """Returns True if category was attributed to document, else
+        returns False."""
+
+
+class IAttributionTreeSet(zope.interface.Interface):
+    """Exposes the TreeSet for intersections and set unions."""
+
+    attribution = zope.interface.Attribute(
+        """An IITreeSet storing attributions.""")

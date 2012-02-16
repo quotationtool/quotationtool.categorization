@@ -4,15 +4,27 @@ import BTrees
 from zope.annotation import factory
 from persistent import Persistent
 import BTrees.OOBTree
+from z3c.indexer.interfaces import IIndex, IIndexer
+from z3c.indexer.index import SetIndex
+from z3c.indexer.indexer import ValueIndexer
+from z3c.indexer.query import AnyOf
+from z3c.indexer.search import SearchQuery
+from zope.lifecycleevent.interfaces import IObjectMovedEvent, IObjectModifiedEvent
+from zope.intid.interfaces import IIntIdRemovedEvent, IIntIds
+from zope.lifecycleevent import ObjectModifiedEvent
+import zope.event
 
-import interfaces
+from quotationtool.site.interfaces import INewQuotationtoolSiteEvent
 
+from quotationtool.categorization import interfaces
+
+
+ATTRIBUTION_KEY = 'quotationtool.categorization.attribution'
+ATTRIBUTION_INDEX = 'attribution-set'
 
 def attributionValue(value):
     return int(bool(value))
 
-
-ATTRIBUTION_KEY = 'quotationtool.categorization.attribution'
 
 class AttributionAnnotation(Persistent):
     """ An attribution implemented as a persistent annotation to
@@ -52,6 +64,7 @@ class AttributionAnnotation(Persistent):
             else:
                 if self.__attributions.has_key(name):
                     self.__attributions.remove(name)
+        zope.event.notify(ObjectModifiedEvent(self))
 
     def clear(self):
         """ See IDoAttribution"""
@@ -59,6 +72,71 @@ class AttributionAnnotation(Persistent):
 
 
 attribution_factory = factory(AttributionAnnotation, ATTRIBUTION_KEY)
+
+
+class AttributionIndexer(ValueIndexer):
+    """ Value indexer that indexes attributions of categorizable
+    objects."""
+
+    indexName = ATTRIBUTION_INDEX # it is a SetIndex
+
+    zope.component.adapts(interfaces.ICategorizable)
+
+    @property
+    def value(self):
+        attribution = interfaces.IAttribution(self.context)
+        return attribution.attributes
+
+
+@zope.component.adapter(INewQuotationtoolSiteEvent)
+def createAttributionIndex(event):
+    sm = event.object.getSiteManager()
+    sm['default'][ATTRIBUTION_INDEX] = idx = SetIndex()
+    sm.registerUtility(idx, IIndex, name=ATTRIBUTION_INDEX)
+
+
+@zope.component.adapter(interfaces.ICategorizable, IObjectModifiedEvent)
+def indexAttributionSubscriber(obj, event):
+    #raise Exception(obj.__parent__)
+    indexer = zope.component.getAdapter(obj, IIndexer, name=ATTRIBUTION_INDEX)
+    indexer.doIndex()
+
+
+@zope.component.adapter(interfaces.ICategory, IIntIdRemovedEvent)
+def removeAttributionSubscriber(category, event):
+    """ Remove attributions if a category is removed."""
+    intids = zope.component.getUtility(IIntIds, context=category)
+    container = zope.component.getUtility(interfaces.ICategoriesContainer, context=category)
+    query = SearchQuery(AnyOf(ATTRIBUTION_INDEX, (category.__name__,)))
+    result = query.apply()
+    for intid in result:
+        categorizable = intids.getObject(intid)
+        attribution = interfaces.IAttribution(categorizable)
+        d = {}
+        for cat in attribution.attributions:
+            if cat != category.__name__:
+                d[cat] = 1
+        attribution.clear()
+        attribution.attribute(**d)
+
+
+@zope.component.adapter(interfaces.ICategory, IObjectMovedEvent)
+def moveAttributionSubscriber(category, event):
+    """ Keep an attribution up to date if a category is renamed."""
+    if event.oldName and event.newName:
+        intids = zope.component.getUtility(IIntIds, context=category)
+        container = zope.component.getUtility(interfaces.ICategoriesContainer, context=category)
+        query = SearchQuery(AnyOf(ATTRIBUTION_INDEX, (event.oldName,)))
+        result = query.apply()
+        for intid in result:
+            categorizable = intids.getObject(intid)
+            attribution = interfaces.IAttribution(categorizable)
+            d = {event.newName: 1}
+            for cat in attribution.attributions:
+                if cat != event.newName:
+                    d[cat] = 1
+            attribution.clear()
+            attribution.attribute(**d)
 
 
 

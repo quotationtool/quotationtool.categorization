@@ -9,6 +9,8 @@ from zope.site.folder import rootFolder
 import zope.event
 
 import quotationtool.categorization
+from quotationtool.categorization import interfaces
+from quotationtool.categorization.testing import Categorizable
 
 
 def setUpZCML(test):
@@ -63,12 +65,35 @@ def tearDownContext(test):
     tearDown(test)
 
 
-def setUpCategoriesContainer(root):
+def generateCategoriesContainer(root):
     from quotationtool.categorization.categoriescontainer import CategoriesContainer
     from quotationtool.categorization.interfaces import ICategoriesContainer
     root['categories'] = container = CategoriesContainer()
     zope.component.provideUtility(container, ICategoriesContainer)
+    # set up some categories
+    from quotationtool.categorization.categoryset import CategorySet
+    from quotationtool.categorization.category import Category
+    for i in range(3):
+        container['set'+str(i+1)] = catset = CategorySet()
+        for l in range(3):
+            catset['cat'+str(i+1)+str(l+1)] = cat = Category()
     return container
+
+
+def setUpAttributionIndex(test):
+    from z3c.indexer.interfaces import IIndex
+    from z3c.indexer.index import SetIndex
+    zope.component.provideUtility(SetIndex(), IIndex, name='attribution-set')
+
+
+def setUpIntIds(test):
+    from quotationtool.categorization.testing import DummyIntIds
+    from zope.intid.interfaces import IIntIds
+    zope.component.provideUtility(DummyIntIds(), IIntIds)
+    from testing import addIntIdSubscriber, removeIntIdSubscriber
+    zope.component.provideHandler(addIntIdSubscriber)
+    zope.component.provideHandler(removeIntIdSubscriber)
+
 
 
 class SiteCreationTests(PlacelessSetup, unittest.TestCase):
@@ -102,7 +127,7 @@ class CategoriesContainerTests(PlacelessSetup, unittest.TestCase):
         super(CategoriesContainerTests, self).setUp()
         setUpZCML(self)
         self.root = rootFolder()
-        setUpCategoriesContainer(self.root)
+        generateCategoriesContainer(self.root)
         from quotationtool.categorization.interfaces import ICategoriesContainer
         self.categories = zope.component.getUtility(ICategoriesContainer, context=self.root)
         
@@ -153,7 +178,9 @@ class AttributionTests(PlacelessSetup, unittest.TestCase):
         super(AttributionTests, self).setUp()
         setUpZCML(self)
         self.root = rootFolder()
-        setUpCategoriesContainer(self.root)
+        generateCategoriesContainer(self.root)
+        setUpAttributionIndexer(self)
+        setUpIntIds(self)
         from quotationtool.categorization.interfaces import ICategoriesContainer
         self.categories = zope.component.getUtility(ICategoriesContainer, context=self.root)
         
@@ -168,6 +195,52 @@ class AttributionTests(PlacelessSetup, unittest.TestCase):
         self.assertTrue(attribution.isAttributed('a0'))
         attribution.clear()
         self.assertTrue(list(attribution.attributions) == [])
+
+
+class IndexerTests(PlacelessSetup, unittest.TestCase):
+        
+    def setUp(self):
+        super(IndexerTests, self).setUp()
+        setUpZCML(self)
+        self.root = rootFolder()
+        generateCategoriesContainer(self.root)
+        setUpAttributionIndex(self)
+        setUpIntIds(self)
+        from quotationtool.categorization.interfaces import ICategoriesContainer
+        self.categories = zope.component.getUtility(ICategoriesContainer, context=self.root)
+        self.root['catable'] = catable = Categorizable()
+        attribution = interfaces.IAttribution(catable)
+        attribution.attribute(cat11=1, cat12=1)
+        
+    def tearDown(self):
+        tearDown(self)
+
+    def test_IndexCreationOnNewSiteEvent(self):
+        """ Test if container is created on a new site event."""
+        from quotationtool.site.site import QuotationtoolSite
+        self.root['quotationtool'] = site = QuotationtoolSite()
+        from z3c.indexer.interfaces import IIndex
+        idx = zope.component.queryUtility(IIndex, name='attribution-set', context=site)
+        self.assertTrue(idx is not None)
+        
+    def test_IfIndexed(self):
+        """ Test if an attribution is indexed at all."""
+        from z3c.indexer.query import AnyOf
+        from z3c.indexer.search import SearchQuery
+        attribution = interfaces.IAttribution(self.root['catable'])
+        attribution.attribute(cat11=1, cat21=1)
+        query = SearchQuery(AnyOf('attribution-set', ('cat11',)))
+        result = query.apply()
+        self.assertTrue(len(result) == 1)
+
+    def test_IndexUpToDateWhenCategoryMoved(self):
+        """ Test if the indexer is up to date if a category was removed."""
+        from zope.copypastemove.interfaces import IObjectMover
+        mover = IObjectMover(self.categories['set1']['cat11'])
+        mover.moveTo(self.categories['set2'])
+        attribution = interfaces.IAttribution(self.root['catable'])
+        self.assertTrue(attribution.isAttributed('cat11'))
+        
         
 
 def test_suite():
@@ -177,6 +250,7 @@ def test_suite():
                                  tearDown = tearDown,
                                  optionflags = doctest.NORMALIZE_WHITESPACE|doctest.ELLIPSIS,
                                  ),
+            unittest.makeSuite(IndexerTests),
             unittest.makeSuite(SiteCreationTests),
             unittest.makeSuite(CategoriesContainerTests),
             unittest.makeSuite(AttributionTests),

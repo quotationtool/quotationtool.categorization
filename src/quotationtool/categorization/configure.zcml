@@ -63,6 +63,8 @@
       />
 
 
+  <!-- categories container -->
+
   <interface
       interface=".interfaces.ICategoriesContainer"
       type="zope.app.content.interfaces.IContentType"
@@ -92,19 +94,25 @@
 	permission="quotationtool.categorization.AddCategory"
 	/>
   </class>
+
   <subscriber
       handler=".categoriescontainer.addCategorySubscriber"
       />
+
   <subscriber
       handler=".categoriescontainer.removeCategorySubscriber"
       />
+
   <subscriber
       handler=".categoriescontainer.moveCategorySubscriber"
       />
+
   <subscriber
       handler=".categoriescontainer.createCategoriesContainer"
       />
 
+
+  <!-- category set -->
 
   <interface
       interface=".interfaces.ICategorySet"
@@ -156,6 +164,8 @@
       />
 
 
+  <!-- category -->
+
   <interface
       interface=".interfaces.ICategory"
       type="zope.app.content.interfaces.IContentType"
@@ -186,6 +196,33 @@
   </class>
 
   
+  <!-- Attribution -->
+
+  <adapter
+      factory=".attribution.attribution_factory"/>
+
+  <subscriber
+      handler=".attribution.indexAttributionSubscriber"/>
+      
+  
+  <!-- indexing attributions -->
+
+  <adapter
+      for=".interfaces.ICategorizable"
+      provides="z3c.indexer.interfaces.IIndexer"
+      name="attribution-set"
+      factory=".attribution.AttributionIndexer"
+      />
+
+  <subscriber
+      handler=".attribution.createAttributionIndex"/>
+
+
+  
+
+
+
+  
   <adapter
       factory=".field.ExclusiveAttributionField"
       provides=".interfaces.IExclusiveAttributionField"
@@ -214,18 +251,6 @@
       factory=".datamanager.NonExclusiveAttributionDataManager"
       />
      
-  <!-- indexing attributions -->
-
-  <adapter
-      for=".interfaces.ICategorizable"
-      provides="z3c.indexer.interfaces.IIndexer"
-      name="attribution-set"
-      factory=".indexer.AttributionIndexer"
-      />
-
-  <subscriber
-      handler=".indexer.createAttributionIndex"/>
-
                                      
 
   <include package=".browser"/>

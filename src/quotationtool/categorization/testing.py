@@ -1,6 +1,25 @@
+import zope.interface
+from persistent import Persistent
+from zope.annotation.interfaces import IAttributeAnnotatable
+from zope.container.contained import Contained
+
+from quotationtool.categorization.interfaces import ICategorizable
 from quotationtool.categorization import interfaces
 from quotationtool.categorization.categoryset import CategorySet
 from quotationtool.categorization.category import Category
+from zope.lifecycleevent.interfaces import IObjectAddedEvent
+from zope.lifecycleevent.interfaces import IObjectRemovedEvent
+from zope.location.interfaces import ILocation
+from zope.location.interfaces import IContained
+import zope.event
+from zope.intid.interfaces import IIntIds, IIntIdEvent
+from zope.intid.interfaces import IntIdAddedEvent, IntIdRemovedEvent
+
+
+class Categorizable(Persistent, Contained):
+    """ A dummy class that is categorizable."""
+    zope.interface.implements(IAttributeAnnotatable, ICategorizable)
+
 
 def createSomeCategorySet():
     faculty = CategorySet()
@@ -18,6 +37,7 @@ def createSomeCategorySet():
     jura.description = u"Where lawers are made."
     jura.weight = 10
     return faculty
+
 
 
 import random
@@ -116,4 +136,38 @@ class DummyIntIds(object):
         uid = self.ids[key]
         del self.refs[uid]
         del self.ids[key]
+
+@zope.component.adapter(ILocation, IObjectRemovedEvent)
+def removeIntIdSubscriber(ob, event):
+    """A subscriber to ObjectRemovedEvent
+
+    Removes the unique ids registered for the object in all the unique
+    id utilities.
+    """
+    utilities = tuple(zope.component.getAllUtilitiesRegisteredFor(IIntIds))
+    if utilities:
+        # Notify the catalogs that this object is about to be removed.
+        zope.event.notify(IntIdRemovedEvent(ob, event))
+        for utility in utilities:
+            try:
+                utility.unregister(ob)
+            except KeyError:
+                pass
+
+
+@zope.component.adapter(ILocation, IObjectAddedEvent)
+def addIntIdSubscriber(ob, event):
+    """A subscriber to ObjectAddedEvent
+
+    Registers the object added in all unique id utilities and fires
+    an event for the catalogs.
+    """
+    utilities = tuple(zope.component.getAllUtilitiesRegisteredFor(IIntIds))
+    if utilities: # assert that there are any utilites
+        idmap = {}
+        for utility in utilities:
+            idmap[utility] = utility.register(ob)
+        # Notify the catalogs that this object was added.
+        zope.event.notify(IntIdAddedEvent(ob, event, idmap))
+
 

@@ -15,26 +15,32 @@
 >>> zope.component.provideUtility(categories, interfaces.ICategoriesContainer)
 
 >>> categories['s1'] = s1 = CategorySet()
+<zope.intid.interfaces.IntIdAddedEvent object at 0x...>
 <zope.lifecycleevent.ObjectAddedEvent object at 0x...>
 <zope.container.contained.ContainerModifiedEvent object at 0x...>
 
 >>> categories['s2'] = s2 = CategorySet()
+<zope.intid.interfaces.IntIdAddedEvent object at 0x...>
 <zope.lifecycleevent.ObjectAddedEvent object at 0x...>
 <zope.container.contained.ContainerModifiedEvent object at 0x...>
 
 >>> categories['s1']['c11'] = c11 = Category()
+<zope.intid.interfaces.IntIdAddedEvent object at 0x...>
 <zope.lifecycleevent.ObjectAddedEvent object at 0x...>
 <zope.container.contained.ContainerModifiedEvent object at 0x...>
 
 >>> categories['s1']['c12'] = c12 = Category()
+<zope.intid.interfaces.IntIdAddedEvent object at 0x...>
 <zope.lifecycleevent.ObjectAddedEvent object at 0x...>
 <zope.container.contained.ContainerModifiedEvent object at 0x...>
 
 >>> categories['s1']['c13'] = c13 = Category()
+<zope.intid.interfaces.IntIdAddedEvent object at 0x...>
 <zope.lifecycleevent.ObjectAddedEvent object at 0x...>
 <zope.container.contained.ContainerModifiedEvent object at 0x...>
 
 >>> categories['s1']['c14'] = c14 = Category()
+<zope.intid.interfaces.IntIdAddedEvent object at 0x...>
 <zope.lifecycleevent.ObjectAddedEvent object at 0x...>
 <zope.container.contained.ContainerModifiedEvent object at 0x...>
 
@@ -104,6 +110,7 @@ That is because weight was not set before adding.
 >>> container = BTreeContainer()
 
 >>> container['o1'] = Contained()
+<zope.intid.interfaces.IntIdAddedEvent object at 0x...>
 <zope.lifecycleevent.ObjectAddedEvent object at 0x...>
 <zope.container.contained.ContainerModifiedEvent object at 0x...>
 

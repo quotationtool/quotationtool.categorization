@@ -203,9 +203,9 @@
 
   <subscriber
       handler=".attribution.indexAttributionSubscriber"/>
-      
-  
-  <!-- indexing attributions -->
+
+  <subscriber
+      handler=".attribution.attributionModifiedDispatcher"/>
 
   <adapter
       for=".interfaces.ICategorizable"
@@ -217,7 +217,11 @@
   <subscriber
       handler=".attribution.createAttributionIndex"/>
 
+  <subscriber
+      handler=".attribution.removeAttributionSubscriber"/>
 
+  <subscriber
+      handler=".attribution.moveAttributionSubscriber"/>
   
 
 

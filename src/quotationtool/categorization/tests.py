@@ -95,6 +95,13 @@ def setUpIntIds(test):
     zope.component.provideHandler(removeIntIdSubscriber)
 
 
+def setUpPlay(test):
+    setUpZCML(test)
+    #generateCategoriesContainer(self.root)
+    setUpAttributionIndex(test)
+    setUpIntIds(test)
+
+
 
 class SiteCreationTests(PlacelessSetup, unittest.TestCase):
 
@@ -128,6 +135,8 @@ class CategoriesContainerTests(PlacelessSetup, unittest.TestCase):
         setUpZCML(self)
         self.root = rootFolder()
         generateCategoriesContainer(self.root)
+        setUpAttributionIndex(self)
+        setUpIntIds(self)
         from quotationtool.categorization.interfaces import ICategoriesContainer
         self.categories = zope.component.getUtility(ICategoriesContainer, context=self.root)
         
@@ -179,10 +188,13 @@ class AttributionTests(PlacelessSetup, unittest.TestCase):
         setUpZCML(self)
         self.root = rootFolder()
         generateCategoriesContainer(self.root)
-        setUpAttributionIndexer(self)
+        setUpAttributionIndex(self)
         setUpIntIds(self)
         from quotationtool.categorization.interfaces import ICategoriesContainer
         self.categories = zope.component.getUtility(ICategoriesContainer, context=self.root)
+        self.root['catable'] = catable = Categorizable()
+        attribution = interfaces.IAttribution(catable)
+        attribution.attribute(cat11=1, cat12=1)
         
     def tearDown(self):
         tearDown(self)
@@ -195,25 +207,6 @@ class AttributionTests(PlacelessSetup, unittest.TestCase):
         self.assertTrue(attribution.isAttributed('a0'))
         attribution.clear()
         self.assertTrue(list(attribution.attributions) == [])
-
-
-class IndexerTests(PlacelessSetup, unittest.TestCase):
-        
-    def setUp(self):
-        super(IndexerTests, self).setUp()
-        setUpZCML(self)
-        self.root = rootFolder()
-        generateCategoriesContainer(self.root)
-        setUpAttributionIndex(self)
-        setUpIntIds(self)
-        from quotationtool.categorization.interfaces import ICategoriesContainer
-        self.categories = zope.component.getUtility(ICategoriesContainer, context=self.root)
-        self.root['catable'] = catable = Categorizable()
-        attribution = interfaces.IAttribution(catable)
-        attribution.attribute(cat11=1, cat12=1)
-        
-    def tearDown(self):
-        tearDown(self)
 
     def test_IndexCreationOnNewSiteEvent(self):
         """ Test if container is created on a new site event."""
@@ -240,13 +233,42 @@ class IndexerTests(PlacelessSetup, unittest.TestCase):
         mover.moveTo(self.categories['set2'])
         attribution = interfaces.IAttribution(self.root['catable'])
         self.assertTrue(attribution.isAttributed('cat11'))
+
+    def test_IndexUpToDateWhenCategoryMovedAndRenamed(self):
+        """ Test if the indexer is up to date if a category was removed."""
+        from zope.copypastemove.interfaces import IObjectMover
+        mover = IObjectMover(self.categories['set1']['cat11'])
+        mover.moveTo(self.categories['set2'], new_name='moved')
+        attribution = interfaces.IAttribution(self.root['catable'])
+        #self.assertTrue(not attribution.isAttributed('cat11'))
+        self.assertTrue(attribution.isAttributed('moved'))
+
+
+class IndexerTests(PlacelessSetup, unittest.TestCase):
+        
+    def setUp(self):
+        super(IndexerTests, self).setUp()
+        setUpZCML(self)
+        self.root = rootFolder()
+        generateCategoriesContainer(self.root)
+        setUpAttributionIndex(self)
+        setUpIntIds(self)
+        from quotationtool.categorization.interfaces import ICategoriesContainer
+        self.categories = zope.component.getUtility(ICategoriesContainer, context=self.root)
+        self.root['catable'] = catable = Categorizable()
+        attribution = interfaces.IAttribution(catable)
+        attribution.attribute(cat11=1, cat12=1)
+        
+    def tearDown(self):
+        tearDown(self)
+
         
         
 
 def test_suite():
     return unittest.TestSuite((
             doctest.DocFileSuite('play.txt',
-                                 setUp = setUpZCML,
+                                 setUp = setUpPlay,
                                  tearDown = tearDown,
                                  optionflags = doctest.NORMALIZE_WHITESPACE|doctest.ELLIPSIS,
                                  ),

@@ -258,6 +258,21 @@ class IAttribution(IDoAttribution, IQueryAttribution):
     """
 
 
+class IAttributionModifiedEvent(zope.interface.Interface):
+    """ Indicates that an attribution was modified."""
+
+    attribution = zope.interface.Attribute("The attribution.")
+
+
+class AttributionModifiedEvent(object):
+
+    zope.interface.implements(IAttributionModifiedEvent)
+
+    def __init__(self, attribution):
+        self.attribution = attribution
+
+    
+
 class IAttributionField(zope.schema.interfaces.IField):
     """A field for attributing a category set."""
 

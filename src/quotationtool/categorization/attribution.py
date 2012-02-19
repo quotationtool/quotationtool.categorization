@@ -13,6 +13,7 @@ from zope.lifecycleevent.interfaces import IObjectMovedEvent, IObjectModifiedEve
 from zope.intid.interfaces import IIntIdRemovedEvent, IIntIds
 from zope.lifecycleevent import ObjectModifiedEvent
 import zope.event
+from zope.location.location import Location
 
 from quotationtool.site.interfaces import INewQuotationtoolSiteEvent
 
@@ -26,7 +27,7 @@ def attributionValue(value):
     return int(bool(value))
 
 
-class AttributionAnnotation(Persistent):
+class AttributionAnnotation(Persistent, Location):
     """ An attribution implemented as a persistent annotation to
     ICategorizable objects.
 
@@ -35,7 +36,7 @@ class AttributionAnnotation(Persistent):
     zope.interface.implements(interfaces.IAttribution)
     zope.component.adapts(interfaces.ICategorizable)
 
-    __name__ = __parent__ = None
+    #__name__ = __parent__ = None
 
     __attributions = {}
 
@@ -64,14 +65,22 @@ class AttributionAnnotation(Persistent):
             else:
                 if self.__attributions.has_key(name):
                     self.__attributions.remove(name)
-        zope.event.notify(ObjectModifiedEvent(self))
+        zope.event.notify(interfaces.AttributionModifiedEvent(self))
 
     def clear(self):
         """ See IDoAttribution"""
         self.__attributions.clear()
+        zope.event.notify(interfaces.AttributionModifiedEvent(self))
 
 
 attribution_factory = factory(AttributionAnnotation, ATTRIBUTION_KEY)
+
+
+@zope.component.adapter(interfaces.IAttributionModifiedEvent)
+def attributionModifiedDispatcher(event):
+    """ Dispatch AttributionModifiedEvent to ObjectModifiedEvent on
+    categorizable (attributed) object."""
+    zope.event.notify(ObjectModifiedEvent(event.attribution.__parent__))
 
 
 class AttributionIndexer(ValueIndexer):
@@ -85,7 +94,7 @@ class AttributionIndexer(ValueIndexer):
     @property
     def value(self):
         attribution = interfaces.IAttribution(self.context)
-        return attribution.attributes
+        return attribution.attributions
 
 
 @zope.component.adapter(INewQuotationtoolSiteEvent)
@@ -97,7 +106,6 @@ def createAttributionIndex(event):
 
 @zope.component.adapter(interfaces.ICategorizable, IObjectModifiedEvent)
 def indexAttributionSubscriber(obj, event):
-    #raise Exception(obj.__parent__)
     indexer = zope.component.getAdapter(obj, IIndexer, name=ATTRIBUTION_INDEX)
     indexer.doIndex()
 
@@ -115,7 +123,7 @@ def removeAttributionSubscriber(category, event):
         d = {}
         for cat in attribution.attributions:
             if cat != category.__name__:
-                d[cat] = 1
+                d[str(cat)] = 1
         attribution.clear()
         attribution.attribute(**d)
 
@@ -131,10 +139,10 @@ def moveAttributionSubscriber(category, event):
         for intid in result:
             categorizable = intids.getObject(intid)
             attribution = interfaces.IAttribution(categorizable)
-            d = {event.newName: 1}
+            d = {str(event.newName): 1}
             for cat in attribution.attributions:
                 if cat != event.newName:
-                    d[cat] = 1
+                    d[str(cat)] = 1
             attribution.clear()
             attribution.attribute(**d)
 

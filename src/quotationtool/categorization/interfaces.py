@@ -202,6 +202,21 @@ class ICategorySet(IWeightedItemsContainer, IWeightedItem):
         default = False,
         )
 
+    #relations = zope.schema.List(
+    #    title = _('icategoryset-relations-title',
+    #              u"Relations"),
+    #    description = _('icategoryset-relations-desc',
+    #                    u""),
+    #    value_type = zope.schema.Choice(
+    #    title = _('icategoryset-relation-title',
+    #              u"Relation"),
+    #    required = True,
+    #    vocabulary = 'quotationtool.categorization.RelationIndices',
+    #    ),
+    #    required = False,
+    #    default = [],
+    #    )
+
     open_to_users = zope.schema.Bool(
         title = _('icategoryset-opentousers-title',
                   u"Open"),
@@ -232,11 +247,11 @@ class ICategoryRemovedEvent(zope.component.interfaces.IObjectEvent):
 class IDoAttribution(zope.interface.Interface):
     """ DO/write an attribution on a categorizable item."""
 
-    def attribute(**kwargs):
-        """ Attribute categories from set to categorizable item.
-        
-        **kwargs gives category names and boolean attribution
-          values."""
+    def attribute(category_name):
+        """ Attribute a categorie to categorizable item."""
+
+    def unattribute(category_name):
+        """ Unattribute a category from categorizable item."""
 
     def clear():
         """ Remove all categories from attribution to categorizable
@@ -249,13 +264,15 @@ class IQueryAttribution(zope.interface.Interface):
     def isAttributed(category_name):
         """ Returns true if and only if category was attributed."""
 
-    attributions = zope.interface.Attribute(""" Returns the list of the names of those categories, that were attributed.""")
         
 
 class IAttribution(IDoAttribution, IQueryAttribution):
     """ To be provided by an adapter for categorizable item.
 
     """
+
+    attributions = zope.interface.Attribute(""" The names of those categories, that were attributed.""")
+    
 
 
 class IAttributionModifiedEvent(zope.interface.Interface):

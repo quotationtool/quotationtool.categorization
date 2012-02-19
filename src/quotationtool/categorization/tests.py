@@ -187,14 +187,15 @@ class AttributionTests(PlacelessSetup, unittest.TestCase):
         super(AttributionTests, self).setUp()
         setUpZCML(self)
         self.root = rootFolder()
+        setUpIntIds(self)
         generateCategoriesContainer(self.root)
         setUpAttributionIndex(self)
-        setUpIntIds(self)
         from quotationtool.categorization.interfaces import ICategoriesContainer
         self.categories = zope.component.getUtility(ICategoriesContainer, context=self.root)
         self.root['catable'] = catable = Categorizable()
         attribution = interfaces.IAttribution(catable)
-        attribution.attribute(cat11=1, cat12=1)
+        attribution.attribute('cat11')
+        attribution.attribute('cat12')
         
     def tearDown(self):
         tearDown(self)
@@ -202,8 +203,8 @@ class AttributionTests(PlacelessSetup, unittest.TestCase):
     def test_Attribution(self):
         from quotationtool.categorization.attribution import AttributionAnnotation
         attribution = AttributionAnnotation()
-        attribution.attribute(a=1, b=0, c=4, a0='a')
-        self.assertTrue(list(attribution.attributions) == ['a', 'a0', 'c'])
+        attribution.attributions = ('a', 'b', 'c', 'a0',)
+        self.assertTrue(list(attribution.attributions) == ['a', 'a0', 'b', 'c'])
         self.assertTrue(attribution.isAttributed('a0'))
         attribution.clear()
         self.assertTrue(list(attribution.attributions) == [])
@@ -221,8 +222,8 @@ class AttributionTests(PlacelessSetup, unittest.TestCase):
         from z3c.indexer.query import AnyOf
         from z3c.indexer.search import SearchQuery
         attribution = interfaces.IAttribution(self.root['catable'])
-        attribution.attribute(cat11=1, cat21=1)
-        query = SearchQuery(AnyOf('attribution-set', ('cat11',)))
+        attribution.attribute('cat21')
+        query = SearchQuery(AnyOf('attribution-set', ('cat21',)))
         result = query.apply()
         self.assertTrue(len(result) == 1)
 
@@ -240,27 +241,18 @@ class AttributionTests(PlacelessSetup, unittest.TestCase):
         mover = IObjectMover(self.categories['set1']['cat11'])
         mover.moveTo(self.categories['set2'], new_name='moved')
         attribution = interfaces.IAttribution(self.root['catable'])
-        #self.assertTrue(not attribution.isAttributed('cat11'))
+        self.assertTrue(not attribution.isAttributed('cat11'))
         self.assertTrue(attribution.isAttributed('moved'))
 
+    def test_IndexUpToDateWhenCategoryRemoved(self):
+        """ Test if the indexer is up to date if a category was removed."""
+        attribution = interfaces.IAttribution(self.root['catable'])
+        self.assertTrue(attribution.isAttributed('cat11'))
+        set1 =  self.categories['set1']
+        del set1['cat11']
+        self.assertTrue(not attribution.isAttributed('cat11'))
 
-class IndexerTests(PlacelessSetup, unittest.TestCase):
-        
-    def setUp(self):
-        super(IndexerTests, self).setUp()
-        setUpZCML(self)
-        self.root = rootFolder()
-        generateCategoriesContainer(self.root)
-        setUpAttributionIndex(self)
-        setUpIntIds(self)
-        from quotationtool.categorization.interfaces import ICategoriesContainer
-        self.categories = zope.component.getUtility(ICategoriesContainer, context=self.root)
-        self.root['catable'] = catable = Categorizable()
-        attribution = interfaces.IAttribution(catable)
-        attribution.attribute(cat11=1, cat12=1)
-        
-    def tearDown(self):
-        tearDown(self)
+
 
         
         
@@ -272,10 +264,9 @@ def test_suite():
                                  tearDown = tearDown,
                                  optionflags = doctest.NORMALIZE_WHITESPACE|doctest.ELLIPSIS,
                                  ),
-            unittest.makeSuite(IndexerTests),
+            unittest.makeSuite(AttributionTests),
             unittest.makeSuite(SiteCreationTests),
             unittest.makeSuite(CategoriesContainerTests),
-            unittest.makeSuite(AttributionTests),
             #doctest.DocTestSuite('quotationtool.categorization.datamanager',
             #                     setUp = setUpWithContext,
             #                     tearDown = tearDownContext,

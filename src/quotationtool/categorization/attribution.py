@@ -36,44 +36,45 @@ class AttributionAnnotation(Persistent, Location):
     zope.interface.implements(interfaces.IAttribution)
     zope.component.adapts(interfaces.ICategorizable)
 
-    #__name__ = __parent__ = None
-
     __attributions = {}
 
-    def __init__(self):
-        self.__attributions = self._newAttributionData()
+    attribution_factory = BTrees.family32.OO.TreeSet
 
-    def _newAttributionData(self):
-        return BTrees.family32.OO.TreeSet()
+    def __init__(self):
+        self.__attributions = self.attribution_factory()
 
     def isAttributed(self, category_name):
-        """ see IQueryAttribution"""
+        """ see IAttribution"""
         return attributionValue(self.__attributions.has_key(category_name))
         
-    @property
-    def attributions(self):
-        """ See IQueryAttribution"""
+    def _getAttributions(self):
         return self.__attributions.keys()
 
-    def attribute(self, **kwargs):
-        """ See IDoAttribution"""
-        # TODO: reset all?
-        for name, value in kwargs.items():
-            if attributionValue(value):
-                if not self.__attributions.has_key(name):
-                    self.__attributions.insert(name)
-            else:
-                if self.__attributions.has_key(name):
-                    self.__attributions.remove(name)
+    def _setAttributions(self, categories):
+        if not isinstance(categories, self.attribution_factory):
+            categories = list(categories)
+        self.__attributions = self.attribution_factory(categories)
+        zope.event.notify(interfaces.AttributionModifiedEvent(self))
+
+    attributions = property(_getAttributions, _setAttributions)
+
+    def unattribute(self, category_name):
+        """ See IAttribution."""
+        self.__attributions.remove(category_name)
+        zope.event.notify(interfaces.AttributionModifiedEvent(self))
+
+    def attribute(self, category_name):
+        """ See IAttribution."""
+        self.__attributions.insert(category_name)
         zope.event.notify(interfaces.AttributionModifiedEvent(self))
 
     def clear(self):
-        """ See IDoAttribution"""
+        """ See IAttribution"""
         self.__attributions.clear()
         zope.event.notify(interfaces.AttributionModifiedEvent(self))
 
 
-attribution_factory = factory(AttributionAnnotation, ATTRIBUTION_KEY)
+attribution_annotation_factory = factory(AttributionAnnotation, ATTRIBUTION_KEY)
 
 
 @zope.component.adapter(interfaces.IAttributionModifiedEvent)
@@ -120,12 +121,7 @@ def removeAttributionSubscriber(category, event):
     for intid in result:
         categorizable = intids.getObject(intid)
         attribution = interfaces.IAttribution(categorizable)
-        d = {}
-        for cat in attribution.attributions:
-            if cat != category.__name__:
-                d[str(cat)] = 1
-        attribution.clear()
-        attribution.attribute(**d)
+        attribution.unattribute(category.__name__)
 
 
 @zope.component.adapter(interfaces.ICategory, IObjectMovedEvent)
@@ -139,12 +135,8 @@ def moveAttributionSubscriber(category, event):
         for intid in result:
             categorizable = intids.getObject(intid)
             attribution = interfaces.IAttribution(categorizable)
-            d = {str(event.newName): 1}
-            for cat in attribution.attributions:
-                if cat != event.newName:
-                    d[str(cat)] = 1
-            attribution.clear()
-            attribution.attribute(**d)
+            attribution.unattribute(event.oldName)
+            attribution.attribute(event.newName)
 
 
 

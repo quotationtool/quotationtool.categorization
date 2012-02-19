@@ -13,6 +13,7 @@
   <include package="zope.app.schema"/>
   <include package="zope.copypastemove"/>
   <include package="zope.container"/>
+  <include package="zope.intid"/>
   
   <include package="quotationtool.security"/>
   <include package="quotationtool.site"/>

@@ -199,10 +199,27 @@
   <!-- Attribution -->
 
   <adapter
-      factory=".attribution.attribution_factory"/>
+      factory=".attribution.attribution_annotation_factory"
+      trusted="True"
+      />
 
-  <subscriber
-      handler=".attribution.indexAttributionSubscriber"/>
+  <class 
+      class=".attribution.AttributionAnnotation">
+    <allow
+	interface=".interfaces.IQueryAttribution"
+	/>
+    <require
+	interface=".interfaces.IDoAttribution"
+	permission="quotationtool.categorization.DoAttribution"
+	/>
+    <allow
+	attributes="attributions"
+	/>
+    <require
+	set_attributes="attributions"
+	permission="quotationtool.categorization.DoAttribution"
+	/>
+  </class>
 
   <subscriber
       handler=".attribution.attributionModifiedDispatcher"/>
@@ -216,6 +233,9 @@
 
   <subscriber
       handler=".attribution.createAttributionIndex"/>
+
+  <subscriber
+      handler=".attribution.indexAttributionSubscriber"/>
 
   <subscriber
       handler=".attribution.removeAttributionSubscriber"/>

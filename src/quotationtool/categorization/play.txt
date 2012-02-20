@@ -132,3 +132,18 @@ That is because weight was not set before adding.
 
 >>> zope.event.subscribers.remove(log_event)
 
+
+
+Play with TreeSets
+------------------
+
+>>> import BTrees
+>>> k1 = BTrees.family32.OO.TreeSet(['a', 'b', 'c'])
+>>> k2 = BTrees.family32.OO.TreeSet(['a', 'ab', 'c'])
+>>> union = BTrees.family32.OO.union
+>>> union(k1, k2)
+OOSet(['a', 'ab', 'b', 'c'])
+
+>>> intersection = BTrees.family32.OO.intersection
+>>> intersection(k1, k2)
+OOSet(['a', 'c'])

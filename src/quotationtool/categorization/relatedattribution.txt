@@ -1,0 +1,92 @@
+Related Attribution
+===================
+
+First we need to define some content.
+
+>>> from quotationtool.categorization import testing, interfaces
+
+>>> import zope.component
+>>> from zope.interface import Interface, implements, Attribute
+>>> from zope.container.contained import Contained
+>>> from persistent import Persistent
+>>> from zope.annotation.interfaces import IAttributeAnnotatable
+>>> class IFoo(Interface):
+...     pass
+...
+>>> class Foo(Persistent, Contained):
+...     implements(IFoo, IAttributeAnnotatable, interfaces.ICategorizable)
+
+>>> class IBar(Interface):
+...      ref = Attribute("Reference to some foo.")
+...
+
+>>> from zope.schema.fieldproperty import FieldProperty
+>>> class Bar(Contained):
+...      implements(IBar, IAttributeAnnotatable, interfaces.ICategorizable)
+...      ref = None
+...
+
+>>> root['foo'] = foo = Foo()
+>>> root['bar'] = bar = Bar()
+>>> bar.ref = foo
+
+>>> intids = testing.DummyIntIds()
+>>> from zope.intid.interfaces import IIntIds
+>>> zope.component.provideUtility(intids, IIntIds)
+
+>>> fooid = intids.register(foo)
+>>> barid = intids.register(bar)
+
+Then we need a relation catalog.
+
+>>> import zc.relation
+>>> cat = zc.relation.catalog.Catalog(testing.dump, testing.load)
+>>> zope.component.provideUtility(cat, zc.relation.interfaces.ICatalog)
+>>> cat.addValueIndex(IBar['ref'], dump=testing.dump, load=testing.load, name='ibar-ref')
+
+>>> def dummy(obj, catalog):
+...     return getattr(obj, 'ref', None)
+>>> cat.addValueIndex(dummy, testing.dump, testing.load)
+
+>>> cat.index(bar)
+>>> cat.index(foo)
+
+And we assert that the relation catalog works:
+
+>>> list(cat.findRelationTokens(
+...     cat.tokenizeQuery({'ibar-ref': foo}))) == [barid]
+True
+
+
+>>> from quotationtool.categorization.categorizableitemdescription import CategorizableItemDescription, CategorizableItemDescriptions
+>>> descriptions = CategorizableItemDescriptions()
+>>> zope.component.provideUtility(descriptions, interfaces.ICategorizableItemDescriptions)
+>>> descriptions['desc1'] = desc1 = CategorizableItemDescription()
+>>> zope.component.interface.provideInterface('IBar', IBar)
+>>> desc1.interface = IBar
+>>> desc1.label = u'bar'
+>>> descriptions['desc2'] = desc2 = CategorizableItemDescription()
+>>> zope.component.interface.provideInterface('IFoo', IFoo)
+>>> desc2.interface = IFoo
+>>> desc2.label = u'foo'
+>>> 
+
+>>> categories = testing.generateCategoriesContainer(root)
+>>> categories['set1'].relation_indices = ['ibar-ref']
+>>> categories['set1'].categorizable_items = [IFoo]
+>>> categories['set3'].relation_indices = ['dummy']
+>>> categories['set3'].categorizable_items = [IBar]
+
+Now we attribute some categories to our foo object.
+
+>>> foo_attribution = interfaces.IAttribution(foo)
+>>> foo_attribution.attributions = ('cat11', 'cat13', 'cat22', 'cat31', 'cat32')
+>>> #foo_attribution.attribution_factory
+
+Intrinsic Indexer
+-----------------
+
+>>> from quotationtool.categorization.relatedattribution import IntrinsicRelationIndexer
+>>> intrinsic = IntrinsicRelationIndexer(bar)
+>>> intrinsic.value
+['cat31', 'cat32']

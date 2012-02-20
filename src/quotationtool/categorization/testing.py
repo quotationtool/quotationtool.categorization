@@ -38,6 +38,19 @@ def createSomeCategorySet():
     jura.weight = 10
     return faculty
 
+def generateCategoriesContainer(root):
+    from quotationtool.categorization.categoriescontainer import CategoriesContainer
+    from quotationtool.categorization.interfaces import ICategoriesContainer
+    root['categories'] = container = CategoriesContainer()
+    zope.component.provideUtility(container, ICategoriesContainer)
+    # set up some categories
+    from quotationtool.categorization.categoryset import CategorySet
+    from quotationtool.categorization.category import Category
+    for i in range(3):
+        container['set'+str(i+1)] = catset = CategorySet()
+        for l in range(3):
+            catset['cat'+str(i+1)+str(l+1)] = cat = Category()
+    return container
 
 
 import random
@@ -171,3 +184,20 @@ def addIntIdSubscriber(ob, event):
         zope.event.notify(IntIdAddedEvent(ob, event, idmap))
 
 
+# dump and load methods for relation catalog
+
+def dump(obj, catalog, cache):
+    """ Dump an object."""
+    intids_ut = cache.get('intids_ut')
+    if not intids_ut:
+        intids_ut = zope.component.getUtility(IIntIds)
+        cache['intids_ut'] = intids_ut
+    return intids_ut.getId(obj)
+
+def load(token, catalog, cache):
+    """Load an object."""
+    intids_ut = cache.get('intids_ut')
+    if not intids_ut:
+        intids_ut = zope.component.getUtility(IIntIds)
+        cache['intids_ut'] = intids_ut
+    return intids_ut.getObject(token)

@@ -19,6 +19,7 @@ from quotationtool.categorization.categorizableitemdescription import Categoriza
 from quotationtool.categorization.interfaces import ICategorizableItemDescriptions
 from quotationtool.categorization.categoriescontainer import CategoriesContainer
 from quotationtool.categorization.interfaces import ICategoriesContainer
+from quotationtool.categorization.relatedattribution import RelationIndicesVocabulary
 
 
 def setUp(test):
@@ -33,6 +34,8 @@ def setUp(test):
                 modeVocabulary)
     vr.register('Interfaces',
                 InterfacesVocabulary)
+    vr.register('quotationtool.categorization.RelationIndices',
+                RelationIndicesVocabulary)
 
     root = test.globs['root']
     sm = root.getSiteManager()

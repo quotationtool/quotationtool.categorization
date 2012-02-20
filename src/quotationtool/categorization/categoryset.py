@@ -17,6 +17,7 @@ class CategorySet(WeightedItemsContainer, Attribution):
     mode = FieldProperty(interfaces.ICategorySet['mode'])
     categorizable_items = FieldProperty(interfaces.ICategorySet['categorizable_items'])
     weight = FieldProperty(interfaces.ICategorySet['weight'])
+    relation_indices = FieldProperty(interfaces.ICategorySet['relation_indices'])
     inherit = FieldProperty(interfaces.ICategorySet['inherit'])
     open_to_users = FieldProperty(interfaces.ICategorySet['open_to_users'])
     complete = FieldProperty(interfaces.ICategorySet['complete'])

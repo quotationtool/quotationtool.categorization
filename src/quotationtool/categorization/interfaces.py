@@ -202,20 +202,20 @@ class ICategorySet(IWeightedItemsContainer, IWeightedItem):
         default = False,
         )
 
-    #relations = zope.schema.List(
-    #    title = _('icategoryset-relations-title',
-    #              u"Relations"),
-    #    description = _('icategoryset-relations-desc',
-    #                    u""),
-    #    value_type = zope.schema.Choice(
-    #    title = _('icategoryset-relation-title',
-    #              u"Relation"),
-    #    required = True,
-    #    vocabulary = 'quotationtool.categorization.RelationIndices',
-    #    ),
-    #    required = False,
-    #    default = [],
-    #    )
+    relation_indices = zope.schema.List(
+        title = _('icategoryset-relationindices-title',
+                  u"Relation Indices"),
+        description = _('icategoryset-relationindices-desc',
+                        u""),
+        value_type = zope.schema.Choice(
+        title = _('icategoryset-relationindex-title',
+                  u"Index"),
+        required = True,
+        vocabulary = 'quotationtool.categorization.RelationIndices',
+        ),
+        required = False,
+        default = [],
+        )
 
     open_to_users = zope.schema.Bool(
         title = _('icategoryset-opentousers-title',

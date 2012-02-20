@@ -66,6 +66,7 @@ setup(
         'zope.keyreference',
         'z3c.indexer',
         'z3c.searcher',
+        'zc.relation',
 
         'z3c.template',
         'z3c.macro',

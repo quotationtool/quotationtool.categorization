@@ -236,13 +236,34 @@
 
   <subscriber
       handler=".attribution.indexAttributionSubscriber"/>
+  <subscriber
+      handler=".attribution.reindexAttributionSubscriber"/>
+  <subscriber
+      handler=".attribution.unindexAttributionSubscriber"/>
 
   <subscriber
       handler=".attribution.removeAttributionSubscriber"/>
-
   <subscriber
       handler=".attribution.moveAttributionSubscriber"/>
   
+
+  <!-- related attribution -->
+
+  <utility
+      component=".relatedattribution.RelationIndicesVocabulary"
+      provides="zope.schema.interfaces.IVocabularyFactory"
+      name="quotationtool.categorization.RelationIndices"
+      />
+
+  <subscriber
+      handler=".relatedattribution.createRelatedAttributionIndex"/>
+
+  <adapter
+      for=".interfaces.ICategorizable"
+      provides="z3c.indexer.interfaces.IIndexer"
+      factory=".relatedattribution.IntrinsicRelationIndexer"
+      name="attribution-from-intrinsic-relation"
+      />
 
 
 
@@ -267,13 +288,13 @@
       name="non-exclusive"
       />
 
-  <adapter
+  <!--adapter
       factory=".datamanager.ExclusiveAttributionDataManager"
       />
 
   <adapter
       factory=".datamanager.NonExclusiveAttributionDataManager"
-      />
+      /-->
      
                                      
 

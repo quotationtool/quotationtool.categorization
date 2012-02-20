@@ -10,7 +10,7 @@ from z3c.indexer.indexer import ValueIndexer
 from z3c.indexer.query import AnyOf
 from z3c.indexer.search import SearchQuery
 from zope.lifecycleevent.interfaces import IObjectMovedEvent, IObjectModifiedEvent
-from zope.intid.interfaces import IIntIdRemovedEvent, IIntIds
+from zope.intid.interfaces import IIntIdAddedEvent, IIntIdRemovedEvent, IIntIds
 from zope.lifecycleevent import ObjectModifiedEvent
 import zope.event
 from zope.location.location import Location
@@ -105,10 +105,28 @@ def createAttributionIndex(event):
     sm.registerUtility(idx, IIndex, name=ATTRIBUTION_INDEX)
 
 
-@zope.component.adapter(interfaces.ICategorizable, IObjectModifiedEvent)
+@zope.component.adapter(interfaces.ICategorizable, IIntIdAddedEvent)
 def indexAttributionSubscriber(obj, event):
+    """ Index an (empty) attribution when a categorizable object was
+    added. """
     indexer = zope.component.getAdapter(obj, IIndexer, name=ATTRIBUTION_INDEX)
     indexer.doIndex()
+
+
+@zope.component.adapter(interfaces.ICategorizable, IObjectModifiedEvent)
+def reindexAttributionSubscriber(obj, event):
+    """ Reindex when a attribution was modified. Only do that if the
+    object is already registered in an intids utility."""
+    intids = zope.component.queryUtility(IIntIds, context=obj)
+    if intids.queryId(obj):
+        indexer = zope.component.getAdapter(obj, IIndexer, name=ATTRIBUTION_INDEX)
+        indexer.doIndex()
+
+
+@zope.component.adapter(interfaces.ICategorizable, IIntIdRemovedEvent)
+def unindexAttributionSubscriber(obj, event):
+    indexer = zope.component.getAdapter(obj, IIndexer, name=ATTRIBUTION_INDEX)
+    indexer.doUnIndex()
 
 
 @zope.component.adapter(interfaces.ICategory, IIntIdRemovedEvent)

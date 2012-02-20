@@ -62,7 +62,7 @@ class AddCategorySet(form.AddForm):
         >>> form.update()
 
         >>> form.widgets.keys()
-        ['weight', 'title', 'description', 'categorizable_items', 'mode', 'inherit', 'open_to_users', 'complete']
+        ['weight', 'title', 'description', 'categorizable_items', 'mode', 'inherit', 'relation_indices', 'open_to_users', 'complete']
         
         >>> form.prefix
         'form.'

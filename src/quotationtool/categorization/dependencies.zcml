@@ -10,7 +10,6 @@
   <include package="zope.security"/>
   <include package="zope.annotation"/>
   <include package="zope.componentvocabulary"/>
-  <include package="zope.app.schema"/>
   <include package="zope.copypastemove"/>
   <include package="zope.container"/>
   <include package="zope.intid"/>

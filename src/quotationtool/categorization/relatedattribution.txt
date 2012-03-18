@@ -1,6 +1,14 @@
 Related Attribution
 ===================
 
+>>> import zope.component
+>>> from z3c.indexer.index import SetIndex
+>>> from z3c.indexer.interfaces import IIndex
+>>> ridx = SetIndex()
+>>> zope.component.provideUtility(ridx, IIndex, name='related-attribution-set')
+
+
+
 First we need to define some content.
 
 >>> from quotationtool.categorization import testing, interfaces
@@ -80,8 +88,24 @@ True
 Now we attribute some categories to our foo object.
 
 >>> foo_attribution = interfaces.IAttribution(foo)
->>> foo_attribution.attributions = ('cat11', 'cat13', 'cat22', 'cat31', 'cat32')
+>>> foo_attribution.set(('cat11', 'cat13', 'cat22', 'cat31', 'cat32'))
 >>> #foo_attribution.attribution_factory
+
+
+Attribution Adapter
+-------------------
+
+>>> bar_attribution = interfaces.IRelatedAttribution(bar)
+>>> bar_attribution.getAttribution()
+['cat31', 'cat32']
+
+>>> bar_attribution.getAttribution(category_set=interfaces.ALL)
+['cat31', 'cat32']
+
+>>> bar_attribution.getAttribution(category_set=categories['set1'])
+[]
+
+
 
 Intrinsic Indexer
 -----------------
@@ -90,3 +114,22 @@ Intrinsic Indexer
 >>> intrinsic = IntrinsicRelationIndexer(bar)
 >>> intrinsic.value
 ['cat31', 'cat32']
+
+>>> intrinsic.doIndex()
+
+>>> from z3c.indexer.query import AnyOf
+>>> from z3c.indexer.search import SearchQuery
+>>> query = SearchQuery(AnyOf('related-attribution-set', ('cat31',)))
+>>> list(query.apply()) == [barid]
+True
+
+
+Reindexing when bar is modified:
+
+>>> bar.ref = None
+>>> cat.index(bar)
+>>> from zope.lifecycleevent import ObjectModifiedEvent
+>>> zope.event.notify(ObjectModifiedEvent(bar))
+>>> query = SearchQuery(AnyOf('related-attribution-set', ('cat31',)))
+>>> list(query.apply()) == []
+True

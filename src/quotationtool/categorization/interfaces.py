@@ -9,6 +9,10 @@ from zope.i18nmessageid import MessageFactory
 
 _ = MessageFactory('quotationtool')
 
+
+# return attribution in ALL category sets
+ALL = 'all'
+
     
 class ICategorizable(zope.interface.Interface):
     """A marker interface for classes that are categorizable."""
@@ -244,8 +248,9 @@ class ICategoryAddedEvent(zope.component.interfaces.IObjectEvent):
 class ICategoryRemovedEvent(zope.component.interfaces.IObjectEvent):
     """Indicates that a category was removed."""
 
-class IDoAttribution(zope.interface.Interface):
-    """ DO/write an attribution on a categorizable item."""
+
+class IWriteAttribution(zope.interface.Interface):
+    """ DO/Write an attribution on a categorizable item."""
 
     def attribute(category_name):
         """ Attribute a categorie to categorizable item."""
@@ -253,27 +258,34 @@ class IDoAttribution(zope.interface.Interface):
     def unattribute(category_name):
         """ Unattribute a category from categorizable item."""
 
+    def set(categories):
+        """ Set attribution to the given category names."""
+
     def clear():
         """ Remove all categories from attribution to categorizable
         item."""
 
 
-class IQueryAttribution(zope.interface.Interface):
-    """ Query/read the attribution on a categorizable item."""
+class IReadAttribution(zope.interface.Interface):
+    """ Query/Read the attribution on a categorizable item."""
 
     def isAttributed(category_name):
         """ Returns true if and only if category was attributed."""
-
         
+    def get():
+        """ Return the attributions."""
 
-class IAttribution(IDoAttribution, IQueryAttribution):
-    """ To be provided by an adapter for categorizable item.
 
-    """
+class IAttribution(IReadAttribution, IWriteAttribution):
+    """ To be provided by an adapter for categorizable item. """
 
-    attributions = zope.interface.Attribute(""" The names of those categories, that were attributed.""")
+
+class IRelatedAttribution(zope.interface.Interface):
+    """ Get attribution from related items."""
+
+    def getAttribution(category_set=ALL):
+        """ Returns the list of attributions."""
     
-
 
 class IAttributionModifiedEvent(zope.interface.Interface):
     """ Indicates that an attribution was modified."""

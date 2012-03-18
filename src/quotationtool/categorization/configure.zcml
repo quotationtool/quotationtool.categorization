@@ -1,5 +1,6 @@
 <configure
     xmlns="http://namespaces.zope.org/zope"
+    xmlns:wfmc="http://namespaces.zope.org/wfmc"
     i18n_domain="quotationtool">
 
   <include file="dependencies.zcml"/>
@@ -206,17 +207,10 @@
   <class 
       class=".attribution.AttributionAnnotation">
     <allow
-	interface=".interfaces.IQueryAttribution"
+	interface=".interfaces.IReadAttribution"
 	/>
     <require
-	interface=".interfaces.IDoAttribution"
-	permission="quotationtool.categorization.DoAttribution"
-	/>
-    <allow
-	attributes="attributions"
-	/>
-    <require
-	set_attributes="attributions"
+	interface=".interfaces.IWriteAttribution"
 	permission="quotationtool.categorization.DoAttribution"
 	/>
   </class>
@@ -255,6 +249,9 @@
       name="quotationtool.categorization.RelationIndices"
       />
 
+  <adapter
+      factory=".relatedattribution.RelatedAttribution"/>
+
   <subscriber
       handler=".relatedattribution.createRelatedAttributionIndex"/>
 
@@ -262,11 +259,17 @@
       for=".interfaces.ICategorizable"
       provides="z3c.indexer.interfaces.IIndexer"
       factory=".relatedattribution.IntrinsicRelationIndexer"
-      name="attribution-from-intrinsic-relation"
+      name="related-attribution-set"
       />
+  <subscriber
+      handler=".relatedattribution.indexWhenIntrinsicallyRelatedCreated"/>
+  <subscriber
+      handler=".relatedattribution.unindexWhenIntrinsicallyRelatedRemoved"/>
+  <subscriber
+      handler=".relatedattribution.reindexWhenIntrinsicallyRelatedModified"/>
 
 
-
+  <!-- attribution fields -->
   
   <adapter
       factory=".field.ExclusiveAttributionField"
@@ -288,14 +291,67 @@
       name="non-exclusive"
       />
 
-  <!--adapter
-      factory=".datamanager.ExclusiveAttributionDataManager"
+
+  <!-- workflow -->
+
+  <configure
+      package="quotationtool.workflow">
+    <wfmc:xpdl
+	file="wp29.xpdl"
+	process="reviewed"
+	id="quotationtool.classify"
+	integration="zope.wfmc.adapter.integration"
+	/>
+  </configure>
+
+  <adapter
+      for="zope.wfmc.interfaces.IParticipant"
+      provides="zope.wfmc.interfaces.IWorkItem"
+      factory="quotationtool.workflow.wp29.Preprocessor"
+      name="quotationtool.classify.preprocessor"
       />
 
   <adapter
-      factory=".datamanager.NonExclusiveAttributionDataManager"
-      /-->
+      factory=".workflow.EditorClassifikation"
+      provides="zope.wfmc.interfaces.IWorkItem"
+      name="quotationtool.classify.editorbranch"
+      />
      
+  <adapter
+      factory=".workflow.ContributorClassifikation"
+      provides="zope.wfmc.interfaces.IWorkItem"
+      name="quotationtool.classify.contributorbranch"
+      />
+     
+  <adapter
+      for="zope.wfmc.interfaces.IParticipant"
+      provides="zope.wfmc.interfaces.IWorkItem"
+      factory="quotationtool.workflow.wp29.Reset"
+      name="quotationtool.classify.reset"
+      />
+
+  <adapter
+      for="zope.wfmc.interfaces.IParticipant"
+      provides="zope.wfmc.interfaces.IWorkItem"
+      factory="quotationtool.workflow.wp29.Postprocessor"
+      name="quotationtool.classify.postprocessor"
+      />
+
+  <adapter
+      for="zope.wfmc.interfaces.IParticipant"
+      provides="zope.wfmc.interfaces.IWorkItem"
+      factory="quotationtool.workflow.wp29.EditorialReview"
+      name="quotationtool.classify.review"
+      />
+
+  <adapter
+      for="zope.wfmc.interfaces.IParticipant"
+      provides="zope.wfmc.interfaces.IWorkItem"
+      factory="quotationtool.workflow.wp29.PostReviewProcessor"
+      name="quotationtool.classify.postreview"
+      />
+
+
                                      
 
   <include package=".browser"/>

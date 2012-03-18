@@ -84,6 +84,7 @@ setup(
         'quotationtool.site',
         'quotationtool.security',
         'quotationtool.skin',
+        'quotationtool.workflow',
         ],
     extras_require = dict(
         test = [

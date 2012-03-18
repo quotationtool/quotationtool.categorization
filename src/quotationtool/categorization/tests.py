@@ -66,12 +66,25 @@ def tearDownContext(test):
     tearDown(test)
 
 
+def setUpRelationCatalog(test):
+    import zc.relation
+    cat = zc.relation.catalog.Catalog(testing.dump, testing.load)
+    zope.component.provideUtility(cat, zc.relation.interfaces.ICatalog)
+    def dummy(obj, catalog):
+        return getattr(obj, 'ref', None)
+    cat.addValueIndex(dummy, testing.dump, testing.load)
 
 
 def setUpAttributionIndex(test):
     from z3c.indexer.interfaces import IIndex
     from z3c.indexer.index import SetIndex
     zope.component.provideUtility(SetIndex(), IIndex, name='attribution-set')
+
+
+def setUpRelatedAttributionIndex(test):
+    from z3c.indexer.interfaces import IIndex
+    from z3c.indexer.index import SetIndex
+    zope.component.provideUtility(SetIndex(), IIndex, name='related-attribution-set')
 
 
 def setUpIntIds(test):
@@ -88,6 +101,15 @@ def setUpPlay(test):
     #testing.generateCategoriesContainer(self.root)
     setUpAttributionIndex(test)
     setUpIntIds(test)
+
+
+def setUpWorkflowConfig(test):
+    setUpZCML(test)
+    setUpIntIds(test)
+    from z3c.indexer.index import SetIndex
+    from z3c.indexer.interfaces import IIndex
+    oids = SetIndex()
+    zope.component.provideUtility(oids, IIndex, name='workflow-relevant-oids')
 
 
 def setUpRelatedAttribution(test):
@@ -178,6 +200,7 @@ class CategoriesContainerTests(PlacelessSetup, unittest.TestCase):
         self.root = rootFolder()
         testing.generateCategoriesContainer(self.root)
         setUpAttributionIndex(self)
+        setUpRelatedAttributionIndex(self)
         setUpIntIds(self)
         from quotationtool.categorization.interfaces import ICategoriesContainer
         self.categories = zope.component.getUtility(ICategoriesContainer, context=self.root)
@@ -221,6 +244,7 @@ class AttributionTests(PlacelessSetup, unittest.TestCase):
         setUpIntIds(self)
         testing.generateCategoriesContainer(self.root)
         setUpAttributionIndex(self)
+        setUpRelatedAttributionIndex(self)
         from quotationtool.categorization.interfaces import ICategoriesContainer
         self.categories = zope.component.getUtility(ICategoriesContainer, context=self.root)
         
@@ -230,11 +254,11 @@ class AttributionTests(PlacelessSetup, unittest.TestCase):
     def test_Attribution(self):
         from quotationtool.categorization.attribution import AttributionAnnotation
         attribution = AttributionAnnotation()
-        attribution.attributions = ('a', 'b', 'c', 'a0',)
-        self.assertTrue(list(attribution.attributions) == ['a', 'a0', 'b', 'c'])
+        attribution.set(('a', 'b', 'c', 'a0',))
+        self.assertTrue(list(attribution.get()) == ['a', 'a0', 'b', 'c'])
         self.assertTrue(attribution.isAttributed('a0'))
         attribution.clear()
-        self.assertTrue(list(attribution.attributions) == [])
+        self.assertTrue(list(attribution.get()) == [])
         attribution.attribute('A')
         self.assertTrue(attribution.isAttributed('A'))
         attribution.unattribute('A')
@@ -330,10 +354,33 @@ class AttributionTests(PlacelessSetup, unittest.TestCase):
         self.assertTrue(len(result) == 1)
 
         
+class RelatedAttributionTests(PlacelessSetup, unittest.TestCase):
+
+    def setUp(self):
+        super(AttributionTests, self).setUp()
+        setUpZCML(self)
+        self.root = rootFolder()
+        setUpIntIds(self)
+        testing.generateCategoriesContainer(self.root)
+        setUpAttributionIndex(self)
+        setUpRelatedAttributionIndex(self)
+        setUpRelationCatalog(self)
+        from quotationtool.categorization.interfaces import ICategoriesContainer
+        self.categories = zope.component.getUtility(ICategoriesContainer, context=self.root)
         
+    def tearDown(self):
+        tearDown(self)
+
+
+
 
 def test_suite():
     return unittest.TestSuite((
+            doctest.DocFileSuite('workflow.txt',
+                                 setUp = setUpWorkflowConfig,
+                                 tearDown = tearDown,
+                                 optionflags = doctest.NORMALIZE_WHITESPACE|doctest.ELLIPSIS,
+                                 ),
             doctest.DocFileSuite('relatedattribution.txt',
                                  setUp = setUpRelatedAttribution,
                                  tearDown = tearDown,

@@ -1,0 +1,199 @@
+Workflow
+========
+
+So let's have a look how things work. First we need to set up the
+worklist for editorial review.
+
+>>> from quotationtool.workflow.worklist import WorkList
+>>> from quotationtool.workflow.interfaces import IWorkList
+>>> import zope.component
+>>> contributor_items = WorkList()
+>>> editor_items = WorkList()
+>>> zope.component.provideUtility(contributor_items, IWorkList, name='contributor')
+>>> zope.component.provideUtility(editor_items, IWorkList, name='editor')
+
+Register simple subscriber to make workflow events visible.
+
+>>> def log_workflow(event):
+...     print(event)
+
+>>> import zope.event
+>>> zope.event.subscribers.append(log_workflow)
+
+Get workflow definition.
+
+>>> from zope.wfmc.interfaces import IProcessDefinition
+>>> import zope.component
+>>> pd = zope.component.getUtility(IProcessDefinition,
+...                                'quotationtool.classify')
+
+>>> pd
+ProcessDefinition('quotationtool.classify')
+
+>>> proc = pd()
+
+>>> import datetime
+>>> from quotationtool.categorization import testing
+>>> foo = testing.Categorizable()
+
+>>> proc.start('bob', unicode(datetime.datetime.now()), 'message', None, foo)
+    ProcessStarted(Process('quotationtool.classify'))
+    Transition(None, Activity('quotationtool.classify.start'))
+    ActivityStarted(Activity('quotationtool.classify.start'))
+    ActivityFinished(Activity('quotationtool.classify.start'))
+    Transition(Activity('quotationtool.classify.start'), Activity('quotationtool.classify.preprocessor'))
+    ActivityStarted(Activity('quotationtool.classify.preprocessor'))
+    WorkItemFinished(u'preprocessor')
+    ActivityFinished(Activity('quotationtool.classify.preprocessor'))
+    Transition(Activity('quotationtool.classify.preprocessor'), Activity('quotationtool.classify.andsplit'))
+    ActivityStarted(Activity('quotationtool.classify.andsplit'))
+    ActivityFinished(Activity('quotationtool.classify.andsplit'))
+    Transition(Activity('quotationtool.classify.andsplit'), Activity('quotationtool.classify.editorialcontribution'))
+    ActivityStarted(Activity('quotationtool.classify.editorialcontribution'))
+    ...
+    Transition(Activity('quotationtool.classify.andsplit'), Activity('quotationtool.classify.contribution'))
+    ActivityStarted(Activity('quotationtool.classify.contribution'))
+    ...
+
+>>> len(contributor_items) == 1
+True
+
+>>> len(editor_items) == 1
+True
+
+>>> contr = contributor_items.pop()
+>>> contr.finish('postpone', u'Need time')
+    <...
+    WorkItemFinished(u'contributorbranch')
+    ActivityFinished(Activity('quotationtool.classify.contribution'))
+    Transition(Activity('quotationtool.classify.contribution'), Activity('quotationtool.classify.contribution'))
+    ActivityStarted(Activity('quotationtool.classify.contribution'))
+    ...
+
+>>> contr = contributor_items.pop()
+>>> #contr.finish('finish', u'Done')
+
+>>> editr = editor_items.pop()
+>>> editr.finish('finish', u'Done') 
+    <...
+    WorkItemFinished(u'editorbranch')
+    ActivityFinished(Activity('quotationtool.classify.editorialcontribution'))
+    Transition(Activity('quotationtool.classify.editorialcontribution'), Activity('quotationtool.classify.cancellingdiscriminator'))
+    ActivityStarted(Activity('quotationtool.classify.cancellingdiscriminator'))
+    ActivityFinished(Activity('quotationtool.classify.cancellingdiscriminator'))
+    Transition(Activity('quotationtool.classify.cancellingdiscriminator'), Activity('quotationtool.classify.reset'))
+    ActivityStarted(Activity('quotationtool.classify.reset'))
+    ...
+    WorkItemFinished(u'reset')
+    ActivityFinished(Activity('quotationtool.classify.reset'))
+    Transition(Activity('quotationtool.classify.reset'), Activity('quotationtool.classify.checkperformer'))
+    ActivityStarted(Activity('quotationtool.classify.checkperformer'))
+    ActivityFinished(Activity('quotationtool.classify.checkperformer'))
+    Transition(Activity('quotationtool.classify.checkperformer'), Activity('quotationtool.classify.postprocessor'))
+    ActivityStarted(Activity('quotationtool.classify.postprocessor'))
+    WorkItemFinished(u'postprocessor')
+    ActivityFinished(Activity('quotationtool.classify.postprocessor'))
+    Transition(Activity('quotationtool.classify.postprocessor'), Activity('quotationtool.classify.finish'))
+    ActivityStarted(Activity('quotationtool.classify.finish'))
+    ActivityFinished(Activity('quotationtool.classify.finish'))
+
+
+There should not be any workitems any more:
+
+>>> len(editor_items) == 0
+True
+
+>>> len(contributor_items) == 0
+True
+
+>>> proc.activities.get(proc.nextActivityId)
+
+There is still the contributor activity. Should be remove it?
+
+>>> proc.activities
+    {6: Activity('quotationtool.classify.contribution')}
+
+
+>>> def printTransitions():
+... 	for t in proc.definition.transitions:
+... 	    print t
+... 	    print t.id
+... 	    print t.from_
+... 	    print t.to
+... 	    print t.condition
+...	    print getattr(t.condition, 'source', '[no condition]')
+...	    print u"============="
+...
+
+>>> #printTransitions()
+
+
+Test editorial review
++++++++++++++++++++++
+
+>>> proc = pd()
+>>> proc.start('bob', unicode(datetime.datetime.now()), 'message', None, foo)
+    ProcessStarted(Process('quotationtool.classify'))
+    Transition(None, Activity('quotationtool.classify.start'))
+    ActivityStarted(Activity('quotationtool.classify.start'))
+    ActivityFinished(Activity('quotationtool.classify.start'))
+    Transition(Activity('quotationtool.classify.start'), Activity('quotationtool.classify.preprocessor'))
+    ActivityStarted(Activity('quotationtool.classify.preprocessor'))
+    WorkItemFinished(u'preprocessor')
+    ActivityFinished(Activity('quotationtool.classify.preprocessor'))
+    Transition(Activity('quotationtool.classify.preprocessor'), Activity('quotationtool.classify.andsplit'))
+    ActivityStarted(Activity('quotationtool.classify.andsplit'))
+    ActivityFinished(Activity('quotationtool.classify.andsplit'))
+    Transition(Activity('quotationtool.classify.andsplit'), Activity('quotationtool.classify.editorialcontribution'))
+    ActivityStarted(Activity('quotationtool.classify.editorialcontribution'))
+    ...
+    Transition(Activity('quotationtool.classify.andsplit'), Activity('quotationtool.classify.contribution'))
+    ActivityStarted(Activity('quotationtool.classify.contribution'))
+    ...
+
+>>> contr = contributor_items.pop()
+>>> contr.finish('finish', 'Done')
+    <...
+    WorkItemFinished(u'contributorbranch')
+    ActivityFinished(Activity('quotationtool.classify.contribution'))
+    Transition(Activity('quotationtool.classify.contribution'), Activity('quotationtool.classify.cancellingdiscriminator'))
+    ActivityStarted(Activity('quotationtool.classify.cancellingdiscriminator'))
+    ActivityFinished(Activity('quotationtool.classify.cancellingdiscriminator'))
+    Transition(Activity('quotationtool.classify.cancellingdiscriminator'), Activity('quotationtool.classify.reset'))
+    ActivityStarted(Activity('quotationtool.classify.reset'))
+    ...
+    WorkItemFinished(u'reset')
+    ActivityFinished(Activity('quotationtool.classify.reset'))
+    Transition(Activity('quotationtool.classify.reset'), Activity('quotationtool.classify.checkperformer'))
+    ActivityStarted(Activity('quotationtool.classify.checkperformer'))
+    ActivityFinished(Activity('quotationtool.classify.checkperformer'))
+    Transition(Activity('quotationtool.classify.checkperformer'), Activity('quotationtool.classify.editorialreview'))
+    ActivityStarted(Activity('quotationtool.classify.editorialreview'))
+    ...
+
+>>> len(contributor_items) == 0
+True
+
+>>> len(editor_items) == 1
+True
+
+>>> editr = editor_items.pop()
+>>> editr.finish('publish', u'OK')
+    <...
+    WorkItemFinished(u'review')
+    ActivityFinished(Activity('quotationtool.classify.editorialreview'))
+    Transition(Activity('quotationtool.classify.editorialreview'), Activity('quotationtool.classify.postreview'))
+    ActivityStarted(Activity('quotationtool.classify.postreview'))
+    WorkItemFinished(u'postreview')
+    ActivityFinished(Activity('quotationtool.classify.postreview'))
+    Transition(Activity('quotationtool.classify.postreview'), Activity('quotationtool.classify.finish2'))
+    ActivityStarted(Activity('quotationtool.classify.finish2'))
+    ActivityFinished(Activity('quotationtool.classify.finish2'))
+
+>>> len(editor_items) == 0
+True
+
+
+Remove logger
+
+>>> zope.event.subscribers.remove(log_workflow)

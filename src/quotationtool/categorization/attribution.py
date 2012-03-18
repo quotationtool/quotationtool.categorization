@@ -44,32 +44,32 @@ class AttributionAnnotation(Persistent, Location):
         self.__attributions = self.attribution_factory()
 
     def isAttributed(self, category_name):
-        """ see IAttribution"""
+        """ see IReadAttribution"""
         return attributionValue(self.__attributions.has_key(category_name))
         
-    def _getAttributions(self):
+    def get(self):
+        """ See IReadAttribution"""
         return self.__attributions.keys()
 
-    def _setAttributions(self, categories):
+    def set(self, categories):
+        """ See IWriteAttribution."""
         if not isinstance(categories, self.attribution_factory):
             categories = list(categories)
         self.__attributions = self.attribution_factory(categories)
         zope.event.notify(interfaces.AttributionModifiedEvent(self))
 
-    attributions = property(_getAttributions, _setAttributions)
-
     def unattribute(self, category_name):
-        """ See IAttribution."""
+        """ See IWriteAttribution."""
         self.__attributions.remove(category_name)
         zope.event.notify(interfaces.AttributionModifiedEvent(self))
 
     def attribute(self, category_name):
-        """ See IAttribution."""
+        """ See IWriteAttribution."""
         self.__attributions.insert(category_name)
         zope.event.notify(interfaces.AttributionModifiedEvent(self))
 
     def clear(self):
-        """ See IAttribution"""
+        """ See IWriteAttribution"""
         self.__attributions.clear()
         zope.event.notify(interfaces.AttributionModifiedEvent(self))
 
@@ -95,7 +95,7 @@ class AttributionIndexer(ValueIndexer):
     @property
     def value(self):
         attribution = interfaces.IAttribution(self.context)
-        return attribution.attributions
+        return attribution.get()
 
 
 @zope.component.adapter(INewQuotationtoolSiteEvent)

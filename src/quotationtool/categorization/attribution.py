@@ -27,18 +27,16 @@ def attributionValue(value):
     return int(bool(value))
 
 
-class AttributionAnnotation(Persistent, Location):
-    """ An attribution implemented as a persistent annotation to
-    ICategorizable objects.
-
-    """
+class AttributionBase(object):
+    """ Implementation of attribution object. """
 
     zope.interface.implements(interfaces.IAttribution)
-    zope.component.adapts(interfaces.ICategorizable)
 
     __attributions = {}
 
-    attribution_factory = BTrees.family32.OO.TreeSet
+    _toggle = False # used to set _p_changed on persistent implementations
+
+    attribution_factory = {}
 
     def __init__(self):
         self.__attributions = self.attribution_factory()
@@ -56,22 +54,39 @@ class AttributionAnnotation(Persistent, Location):
         if not isinstance(categories, self.attribution_factory):
             categories = list(categories)
         self.__attributions = self.attribution_factory(categories)
-        zope.event.notify(interfaces.AttributionModifiedEvent(self))
+        ~(self._toggle) # set _p_changed
 
     def unattribute(self, category_name):
         """ See IWriteAttribution."""
         self.__attributions.remove(category_name)
-        zope.event.notify(interfaces.AttributionModifiedEvent(self))
+        ~(self._toggle)
 
     def attribute(self, category_name):
         """ See IWriteAttribution."""
         self.__attributions.insert(category_name)
-        zope.event.notify(interfaces.AttributionModifiedEvent(self))
+        ~(self._toggle)
 
     def clear(self):
         """ See IWriteAttribution"""
         self.__attributions.clear()
-        zope.event.notify(interfaces.AttributionModifiedEvent(self))
+        ~(self._toggle)
+
+
+class PersistentAttribution(Persistent, AttributionBase):
+    """ A persistent implementation of an attribution.
+    """
+
+    attribution_factory = BTrees.family32.OO.TreeSet
+
+
+class AttributionAnnotation(PersistentAttribution, Location):
+    """ An attribution implemented as a persistent annotation to
+    ICategorizable objects.
+
+    """
+
+    zope.interface.implements(interfaces.IAttribution)
+    zope.component.adapts(interfaces.ICategorizable)
 
 
 attribution_annotation_factory = factory(AttributionAnnotation, ATTRIBUTION_KEY)

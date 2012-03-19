@@ -7,6 +7,7 @@ from zope.app.testing.setup import placefulSetUp, placefulTearDown
 from zope.configuration.xmlconfig import XMLConfig
 from zope.site.folder import rootFolder
 import zope.event
+from zope.lifecycleevent import ObjectModifiedEvent
 
 import quotationtool.categorization
 from quotationtool.categorization import testing
@@ -281,9 +282,11 @@ class AttributionTests(PlacelessSetup, unittest.TestCase):
         self.root['c'] = catable = Categorizable()
         attribution = interfaces.IAttribution(catable)
         attribution.attribute('cat11')
+        zope.event.notify(ObjectModifiedEvent(catable))
         from zope.copypastemove.interfaces import IObjectMover
         mover = IObjectMover(self.categories['set1']['cat11'])
         mover.moveTo(self.categories['set2'], new_name='moved')
+        zope.event.notify(ObjectModifiedEvent(catable))
         self.assertTrue(not attribution.isAttributed('cat11'))
         self.assertTrue(attribution.isAttributed('moved'))
 
@@ -292,9 +295,11 @@ class AttributionTests(PlacelessSetup, unittest.TestCase):
         self.root['c'] = catable = Categorizable()
         attribution = interfaces.IAttribution(catable)
         attribution.attribute('cat11')
+        zope.event.notify(ObjectModifiedEvent(catable))
         self.assertTrue(attribution.isAttributed('cat11'))
         set1 =  self.categories['set1']
         del set1['cat11']
+        zope.event.notify(ObjectModifiedEvent(catable))
         self.assertTrue(not attribution.isAttributed('cat11'))
 
     def test_IfIndexed(self):
@@ -302,12 +307,14 @@ class AttributionTests(PlacelessSetup, unittest.TestCase):
         self.root['c'] = catable = Categorizable()
         attribution = interfaces.IAttribution(catable)
         attribution.attribute('cat21')
+        zope.event.notify(ObjectModifiedEvent(catable))
         from z3c.indexer.query import AnyOf
         from z3c.indexer.search import SearchQuery
         query = SearchQuery(AnyOf('attribution-set', ('cat21',)))
         result = query.apply()
         self.assertTrue(len(result) == 1)
         attribution.unattribute('cat21')
+        zope.event.notify(ObjectModifiedEvent(catable))
         query = SearchQuery(AnyOf('attribution-set', ('cat21',)))
         result = query.apply()
         self.assertTrue(len(result) == 0)
@@ -341,9 +348,11 @@ class AttributionTests(PlacelessSetup, unittest.TestCase):
         self.root['c'] = catable = Categorizable()
         attribution = interfaces.IAttribution(catable)
         attribution.attribute('cat11')
+        zope.event.notify(ObjectModifiedEvent(catable))
         from zope.copypastemove.interfaces import IObjectMover
         mover = IObjectMover(self.categories['set1']['cat11'])
         mover.moveTo(self.categories['set2'], new_name='moved')
+        zope.event.notify(ObjectModifiedEvent(catable))
         from z3c.indexer.query import AnyOf
         from z3c.indexer.search import SearchQuery
         query = SearchQuery(AnyOf('attribution-set', ('cat22',)))

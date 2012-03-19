@@ -30,13 +30,38 @@ Get workflow definition.
 >>> pd
 ProcessDefinition('quotationtool.classify')
 
->>> proc = pd()
+Create some content:
 
->>> import datetime
 >>> from quotationtool.categorization import testing
 >>> foo = testing.Categorizable()
 
->>> proc.start('bob', unicode(datetime.datetime.now()), 'message', None, foo)
+We need a history:
+
+>>> from quotationtool.workflow.interfaces import IWorkflowHistory, IHasWorkflowHistory
+>>> zope.interface.classImplements(testing.Categorizable, IHasWorkflowHistory)
+>>> history = IWorkflowHistory(foo)
+
+We use a process context to store foo:
+
+>>> from quotationtool.categorization import workflow
+>>> context = workflow.ClassifikationContext(foo)
+
+We use an attribution object as start parameter. It will get stored to
+the item after the process is done.
+
+>>> from quotationtool.categorization.attribution import PersistentAttribution
+>>> attribution = PersistentAttribution()
+>>> attribution.set(('a', 'b'))
+
+We can now create the process:
+
+>>> proc = pd(context)
+
+Before starting we need a timestamp:
+
+>>> import datetime
+>>> proc.start('bob', unicode(datetime.datetime.now()), 'Some message', history, attribution)
+    <...
     ProcessStarted(Process('quotationtool.classify'))
     Transition(None, Activity('quotationtool.classify.start'))
     ActivityStarted(Activity('quotationtool.classify.start'))
@@ -96,6 +121,8 @@ True
     Transition(Activity('quotationtool.classify.postprocessor'), Activity('quotationtool.classify.finish'))
     ActivityStarted(Activity('quotationtool.classify.finish'))
     ActivityFinished(Activity('quotationtool.classify.finish'))
+    ...
+    ProcessFinished(Process('quotationtool.classify'))
 
 
 There should not be any workitems any more:
@@ -111,6 +138,8 @@ True
 There is still the contributor activity. Should be remove it?
 
 >>> proc.activities
+    {}
+
     {6: Activity('quotationtool.classify.contribution')}
 
 
@@ -128,11 +157,25 @@ There is still the contributor activity. Should be remove it?
 >>> #printTransitions()
 
 
+Now the item is attributed:
+
+
+>>> from quotationtool.categorization import interfaces
+>>> list(interfaces.IAttribution(foo).get())
+    ['a', 'b']
+
+
+
 Test editorial review
 +++++++++++++++++++++
 
->>> proc = pd()
->>> proc.start('bob', unicode(datetime.datetime.now()), 'message', None, foo)
+
+>>> bar = testing.Categorizable()
+>>> history = IWorkflowHistory(bar)
+>>> context = workflow.ClassifikationContext(bar)
+>>> proc = pd(context)
+>>> proc.start('bob', unicode(datetime.datetime.now()), 'message', history, attribution)
+    <...
     ProcessStarted(Process('quotationtool.classify'))
     Transition(None, Activity('quotationtool.classify.start'))
     ActivityStarted(Activity('quotationtool.classify.start'))
@@ -189,6 +232,8 @@ True
     Transition(Activity('quotationtool.classify.postreview'), Activity('quotationtool.classify.finish2'))
     ActivityStarted(Activity('quotationtool.classify.finish2'))
     ActivityFinished(Activity('quotationtool.classify.finish2'))
+    ...
+    ProcessFinished(Process('quotationtool.classify'))
 
 >>> len(editor_items) == 0
 True

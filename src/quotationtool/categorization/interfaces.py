@@ -347,6 +347,13 @@ AttributionValueField = zope.schema.Tuple(
     )
 
 
+class IClassificationWorkItem(zope.interface.Interface):
+    """ A workflow item that asks for a database item to be classified.
+
+    The categorizable object lives on the 'item' attribute of the
+    process's context."""
+
+
 
 ### BBB: will be removed
 class IAttributionInjection(zope.interface.Interface):

@@ -1,0 +1,10 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope">
+
+  <subscriber
+      for=".interfaces.ICategorizable
+	   zope.intid.interfaces.IIntIdAddedEvent"
+      handler=".workflow.classifySubscriber"
+      />
+
+</configure>

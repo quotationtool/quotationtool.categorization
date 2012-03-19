@@ -1,17 +1,22 @@
 from zope.interface import implements
 import zope.component
-from zope.wfmc.interfaces import ProcessError
+from zope.wfmc.interfaces import ProcessError, IProcessDefinition
 import zope.event
 from persistent import Persistent
+from zope.security.management import getInteraction
+import datetime
 
 from quotationtool.workflow import wp29
+from quotationtool.workflow.interfaces import IWorkflowHistory
 
 from quotationtool.categorization import interfaces
 from quotationtool.categorization.interfaces import _
 
 
-class ClassifikationWorkItem(wp29.SplitBranchWorkItem):
+class ClassificationWorkItem(wp29.SplitBranchWorkItem):
     
+    implements(interfaces.IClassificationWorkItem)
+
     def OFFstartHook(self):
         if not interfaces.ICategorizable.providedBy(self.object_):
             raise ProcessError(_('icategorizable-not-provided',
@@ -21,27 +26,34 @@ class ClassifikationWorkItem(wp29.SplitBranchWorkItem):
     #finishHook = startHook
 
 
-class ContributorClassifikation(ClassifikationWorkItem):
+class ContributorClassification(ClassificationWorkItem):
 
     worklist = 'contributor'
 
 
-class EditorClassifikation(ClassifikationWorkItem):
+class EditorClassification(ClassificationWorkItem):
 
     worklist = 'editor'
 
 
-class TechnicalEditorClassifikation(ClassifikationWorkItem):
+class TechnicalEditorClassification(ClassificationWorkItem):
 
     worklist = 'technicaleditor'
 
 
-class ScriptClassifikation(ClassifikationWorkItem):
+class ScriptClassification(ClassificationWorkItem):
 
     worklist = 'script'
 
 
-class ClassifikationContext(Persistent, wp29.CancellingContext):
+class EditorialReview(wp29.EditorialReview):
+
+    implements(interfaces.IClassificationWorkItem)
+
+    worklist = 'editor'
+
+
+class ClassificationContext(Persistent, wp29.CancellingContext):
 
     item = None # the categorizable database item
 
@@ -53,3 +65,21 @@ class ClassifikationContext(Persistent, wp29.CancellingContext):
         annotation.set(self.object_.get())
         zope.event.notify(interfaces.AttributionModifiedEvent(self.item))
         #raise Exception(self.object_.get())
+
+
+def classifySubscriber(item, event):
+    """ A subscriber for an object event that fires a
+    quotationtool.classify workflow process for this item."""
+    pd = zope.component.getUtility(IProcessDefinition,
+                                   name='quotationtool.classify')
+    context = ClassificationContext(item)
+    process = pd(context)
+    for principal in getInteraction().participations:
+        contributor = principal.id
+        break
+    history = IWorkflowHistory(item)
+    process.start(contributor, 
+                  datetime.datetime.now(), 
+                  _(u"Newly created items need to be classified."),
+                  history,
+                  PersistentAttribution())

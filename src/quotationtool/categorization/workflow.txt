@@ -44,7 +44,7 @@ We need a history:
 We use a process context to store foo:
 
 >>> from quotationtool.categorization import workflow
->>> context = workflow.ClassifikationContext(foo)
+>>> context = workflow.ClassificationContext(foo)
 
 We use an attribution object as start parameter. It will get stored to
 the item after the process is done.
@@ -172,7 +172,7 @@ Test editorial review
 
 >>> bar = testing.Categorizable()
 >>> history = IWorkflowHistory(bar)
->>> context = workflow.ClassifikationContext(bar)
+>>> context = workflow.ClassificationContext(bar)
 >>> proc = pd(context)
 >>> proc.start('bob', unicode(datetime.datetime.now()), 'message', history, attribution)
     <...

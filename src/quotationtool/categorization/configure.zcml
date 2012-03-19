@@ -312,13 +312,13 @@
       />
 
   <adapter
-      factory=".workflow.EditorClassifikation"
+      factory=".workflow.EditorClassification"
       provides="zope.wfmc.interfaces.IWorkItem"
       name="quotationtool.classify.editorbranch"
       />
      
   <adapter
-      factory=".workflow.ContributorClassifikation"
+      factory=".workflow.ContributorClassification"
       provides="zope.wfmc.interfaces.IWorkItem"
       name="quotationtool.classify.contributorbranch"
       />
@@ -340,7 +340,7 @@
   <adapter
       for="zope.wfmc.interfaces.IParticipant"
       provides="zope.wfmc.interfaces.IWorkItem"
-      factory="quotationtool.workflow.wp29.EditorialReview"
+      factory=".workflow.EditorialReview"
       name="quotationtool.classify.review"
       />
 
@@ -351,8 +351,13 @@
       name="quotationtool.classify.postreview"
       />
 
+  <adapter
+      for=".interfaces.IClassificationWorkItem"
+      provides="z3c.indexer.interfaces.IIndexer"
+      factory="quotationtool.workflow.workitem.OIDsIndexerByContextItem"
+      name="quotationtool.classification-oids"
+      />
 
-                                     
 
   <include package=".browser"/>
 

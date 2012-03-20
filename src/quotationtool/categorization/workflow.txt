@@ -239,6 +239,34 @@ True
 True
 
 
+Subscriber
+++++++++++
+
+There is a subscriber that still needs to get registered. Note that it
+is not registered automatically. One needs to load subscriber.zcml or
+register it somehow else. Here we do it in python.
+
+>>> from zope.intid.interfaces import IIntIdAddedEvent
+>>> zope.component.provideHandler(workflow.classifySubscriber, [interfaces.ICategorizable, IIntIdAddedEvent])
+
+We still need an interaction which is not set up in test setup.
+
+>>> from zope.security.management import newInteraction
+>>> interaction = newInteraction()
+
+
+Now adding a categorizable to a container starts a workflow.
+
+>>> hoy = testing.Categorizable()
+>>> root['hoy'] = hoy
+    <...
+    ProcessStarted(Process('quotationtool.classify'))
+    ...
+
+
+Cleanup
++++++++
+
 Remove logger
 
 >>> zope.event.subscribers.remove(log_workflow)

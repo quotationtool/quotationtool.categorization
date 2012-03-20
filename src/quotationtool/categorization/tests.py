@@ -107,6 +107,10 @@ def setUpPlay(test):
 def setUpWorkflowConfig(test):
     setUpZCML(test)
     setUpIntIds(test)
+    test.globs['root'] = root = rootFolder()
+    setUpIntIds(test)
+    setUpAttributionIndex(test)
+    setUpRelatedAttributionIndex(test)
     from z3c.indexer.index import SetIndex
     from z3c.indexer.interfaces import IIndex
     oids = SetIndex()

@@ -11,7 +11,7 @@ from quotationtool.workflow.interfaces import IWorkflowHistory
 
 from quotationtool.categorization import interfaces
 from quotationtool.categorization.interfaces import _
-
+from quotationtool.categorization.attribution import PersistentAttribution
 
 class ClassificationWorkItem(wp29.SplitBranchWorkItem):
     
@@ -74,6 +74,7 @@ def classifySubscriber(item, event):
                                    name='quotationtool.classify')
     context = ClassificationContext(item)
     process = pd(context)
+    contributor = u"unkown"
     for principal in getInteraction().participations:
         contributor = principal.id
         break

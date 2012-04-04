@@ -42,7 +42,11 @@ def generateCategoriesContainer(root):
     from quotationtool.categorization.categoriescontainer import CategoriesContainer
     from quotationtool.categorization.interfaces import ICategoriesContainer
     root['categories'] = container = CategoriesContainer()
-    zope.component.provideUtility(container, ICategoriesContainer)
+    if zope.component.interfaces.ISite.providedBy(root):
+        sm = root.getSiteManager()
+        sm.registerUtility(container, ICategoriesContainer)
+    else:
+        zope.component.provideUtility(container, ICategoriesContainer)
     # set up some categories
     from quotationtool.categorization.categoryset import CategorySet
     from quotationtool.categorization.category import Category

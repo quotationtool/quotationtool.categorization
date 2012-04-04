@@ -38,9 +38,12 @@ First we need to define some content.
 >>> root['bar'] = bar = Bar()
 >>> bar.ref = foo
 
->>> intids = testing.DummyIntIds()
+>>> from zope.intid import IntIds
 >>> from zope.intid.interfaces import IIntIds
+>>> from zope.keyreference.testing import SimpleKeyReference
+>>> intids = IntIds()
 >>> zope.component.provideUtility(intids, IIntIds)
+>>> zope.component.provideAdapter(SimpleKeyReference)
 
 >>> fooid = intids.register(foo)
 >>> barid = intids.register(bar)

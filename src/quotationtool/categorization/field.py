@@ -54,30 +54,29 @@ class ExclusiveAttributionField(zope.schema.Choice):
         >>> from quotationtool.categorization.field \
         import ExclusiveAttributionField
         >>> from quotationtool.categorization.testing \
-        import createSomeCategorySet
-        >>> cs = createSomeCategorySet()
-        >>> from quotationtool.categorization.categoriescontainer \
-        import CategoriesContainer
-        >>> categories = root['categories'] = CategoriesContainer()
-        >>> categories['dummy'] = cs
+        import generateCategoriesContainer
+        >>> categories = generateCategoriesContainer(root)
+
+        >>> categories['set1'].title = u"Set 1"
+        >>> categories['set1'].description = u"Description of Set 1"
 
     
     Now we can init our datamanager:
 
-        >>> fld = ExclusiveAttributionField(cs)
+        >>> fld = ExclusiveAttributionField(categories['set1'])
         >>> fld
         <quotationtool.categorization.field.ExclusiveAttributionField object at ...>
 
         >>> fld.title
-        u'dummy-title'
+        u'set1-title'
 
         >>> fld.description
-        u'dummy-desc'
+        u'set1-desc'
 
-        >>> [term.value for term in fld.vocabulary] == cs.values()
+        >>> [term.value for term in fld.vocabulary] == categories['set1'].values()
         True
 
-        >>> fld.category_set == cs
+        >>> fld.category_set == categories['set1']
         True
 
     """
@@ -110,32 +109,31 @@ class NonExclusiveAttributionField(zope.schema.List):
     the datamanager is very restrictive.
 
         >>> from quotationtool.categorization.testing \
-        import createSomeCategorySet
-        >>> cs = createSomeCategorySet()
-        >>> from quotationtool.categorization.categoriescontainer \
-        import CategoriesContainer
-        >>> categories = root['categories'] = CategoriesContainer()
-        >>> categories['dummy'] = cs
+        import generateCategoriesContainer
+        >>> categories = generateCategoriesContainer(root)
+
+        >>> categories['set2'].title = u"Set 2"
+        >>> categories['set2'].description = u"Description of Set 2"
 
     
     Now we can init our datamanager:
 
         >>> from quotationtool.categorization.field \
         import NonExclusiveAttributionField
-        >>> fld = NonExclusiveAttributionField(cs)
+        >>> fld = NonExclusiveAttributionField(categories['set2'])
         >>> fld
         <quotationtool.categorization.field.NonExclusiveAttributionField object at ...>
 
         >>> fld.title
-        u'dummy-title'
+        u'set2-title'
 
         >>> fld.description
-        u'dummy-desc'
+        u'set2-desc'
 
-        >>> [term.value for term in fld.value_type.vocabulary] == cs.values()
+        >>> [term.value for term in fld.value_type.vocabulary] == categories['set2'].values()
         True
 
-        >>> fld.category_set == cs
+        >>> fld.category_set == categories['set2']
         True
 
     """

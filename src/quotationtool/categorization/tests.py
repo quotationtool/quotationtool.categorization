@@ -3,6 +3,7 @@ import doctest
 import zope.component
 from zope.component.testing import setUp, tearDown, PlacelessSetup
 from zope.schema import vocabulary
+from zope.app.testing import placelesssetup
 from zope.app.testing.setup import placefulSetUp, placefulTearDown
 from zope.configuration.xmlconfig import XMLConfig
 from zope.site.folder import rootFolder
@@ -26,7 +27,22 @@ def setUpZCML(test):
     XMLConfig('configure.zcml', quotationtool.categorization)()
 
 
-def setUpWithContext(test):
+def setUpFieldConfigOFF(test):
+    #test.globs = {'root': placefulSetUp(True)} # placeful setup
+    placelesssetup.setUp()
+    test.globs = {'root': rootFolder()}
+    root = test.globs['root']
+    from quotationtool.categorization.categorizableitemdescription import CategorizableItemDescriptions
+    from quotationtool.categorization.interfaces import ICategorizableItemDescriptions
+    root['descriptions'] = CategorizableItemDescriptions()
+    #sm = root.getSiteManager() # placefull setup
+    #sm.registerUtility(root['descriptions'],
+    #                   ICategorizableItemDescriptions)
+    zope.component.provideUtility(root['descriptions'], ICategorizableItemDescriptions)
+    setUpZCML(test)
+
+
+def setUpFieldConfig(test):
     from zope.componentvocabulary.vocabulary import InterfacesVocabulary
     from quotationtool.categorization.weighteditemscontainer import updateWeightedItemsContainerOrder
     from quotationtool.categorization.categorizableitemdescription import CategorizableItemDescriptions, categorizableItemDescriptionVocabulary
@@ -42,6 +58,9 @@ def setUpWithContext(test):
                 categorizableItemDescriptionVocabulary)
     vr.register('Interfaces',
                 InterfacesVocabulary)
+    from quotationtool.categorization.relatedattribution import RelationIndicesVocabulary
+    vr.register('quotationtool.categorization.RelationIndices',
+                RelationIndicesVocabulary)
 
     root = test.globs['root']
     root['descriptions'] = CategorizableItemDescriptions()
@@ -49,18 +68,6 @@ def setUpWithContext(test):
     sm.registerUtility(root['descriptions'],
                        ICategorizableItemDescriptions)
     
-
-def setUpWithContextOFF(test):
-    setUpZCML(test)
-    # placeful setup
-    test.globs = {'root': placefulSetUp(True)}
-    root = test.globs['root']
-    # create and register an utility for categorizable item descriptions
-    from quotationtool.categorization.categorizableitemdescription import CategorizableItemDescriptions
-    from quotationtool.categorization.interfaces import ICategorizableItemDescriptions
-    descriptions = CategorizableItemDescriptions()
-    zope.component.provideUtility(descriptions,
-                                  ICategorizableItemDescriptions)
 
 def tearDownContext(test):
     placefulTearDown()
@@ -89,12 +96,11 @@ def setUpRelatedAttributionIndex(test):
 
 
 def setUpIntIds(test):
-    from quotationtool.categorization.testing import DummyIntIds
+    from zope.intid import IntIds
     from zope.intid.interfaces import IIntIds
-    zope.component.provideUtility(DummyIntIds(), IIntIds)
-    from testing import addIntIdSubscriber, removeIntIdSubscriber
-    zope.component.provideHandler(addIntIdSubscriber)
-    zope.component.provideHandler(removeIntIdSubscriber)
+    from zope.keyreference.testing import SimpleKeyReference
+    zope.component.provideAdapter(SimpleKeyReference)
+    zope.component.provideUtility(IntIds(), IIntIds)
 
 
 def setUpPlay(test):
@@ -111,10 +117,8 @@ def setUpWorkflowConfig(test):
     setUpIntIds(test)
     setUpAttributionIndex(test)
     setUpRelatedAttributionIndex(test)
-    from z3c.indexer.index import SetIndex
-    from z3c.indexer.interfaces import IIndex
-    oids = SetIndex()
-    zope.component.provideUtility(oids, IIndex, name='workflow-relevant-oids')
+    from quotationtool.workflow.testing import setUpIndices as setUpWorkflowIndices
+    setUpWorkflowIndices(test)
 
 
 def setUpRelatedAttribution(test):
@@ -389,6 +393,11 @@ class RelatedAttributionTests(PlacelessSetup, unittest.TestCase):
 
 def test_suite():
     return unittest.TestSuite((
+            doctest.DocTestSuite('quotationtool.categorization.field',
+                                 setUp = setUpFieldConfig,
+                                 tearDown = tearDownContext,
+                                 optionflags=doctest.NORMALIZE_WHITESPACE|doctest.ELLIPSIS,
+                                 ),
             doctest.DocFileSuite('workflow.txt',
                                  setUp = setUpWorkflowConfig,
                                  tearDown = tearDown,
@@ -407,11 +416,6 @@ def test_suite():
             unittest.makeSuite(AttributionTests),
             unittest.makeSuite(SiteCreationTests),
             unittest.makeSuite(CategoriesContainerTests),
-            #doctest.DocTestSuite('quotationtool.categorization.field',
-            #                     setUp = setUpWithContext,
-            #                     tearDown = tearDownContext,
-            #                     optionflags=doctest.NORMALIZE_WHITESPACE|doctest.ELLIPSIS,
-            #                     ),
             #doctest.DocFileSuite('README.txt',
             #                     setUp = setUpWithContext,
             #                     tearDown = tearDownContext,

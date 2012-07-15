@@ -1,0 +1,20 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:z3c="http://namespaces.zope.org/z3c"
+    >
+
+  <adapter
+      for="..interfaces.ICategorizable
+	   ..interfaces.INonExclusiveAttributionField"
+      provides="z3c.form.interfaces.IDataManager"
+      factory=".datamanager.NonExclusiveAttributionDataManager"
+      />
+
+  <adapter
+      for="..interfaces.ICategorizable
+	   ..interfaces.IExclusiveAttributionField"
+      provides="z3c.form.interfaces.IDataManager"
+      factory=".datamanager.ExclusiveAttributionDataManager"
+      />
+
+</configure>

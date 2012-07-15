@@ -9,6 +9,7 @@ from zope.configuration.xmlconfig import XMLConfig
 from zope.site.folder import rootFolder
 import zope.event
 from zope.lifecycleevent import ObjectModifiedEvent
+from zope.app.component import hooks
 
 import quotationtool.categorization
 from quotationtool.categorization import testing
@@ -27,22 +28,22 @@ def setUpZCML(test):
     XMLConfig('configure.zcml', quotationtool.categorization)()
 
 
-def setUpFieldConfigOFF(test):
-    #test.globs = {'root': placefulSetUp(True)} # placeful setup
-    placelesssetup.setUp()
-    test.globs = {'root': rootFolder()}
+def setUpFieldConfig(test):
+    test.globs = {'root': placefulSetUp(True)} # placeful setup
+    #placelesssetup.setUp()
+    #test.globs = {'root': rootFolder()}
     root = test.globs['root']
     from quotationtool.categorization.categorizableitemdescription import CategorizableItemDescriptions
     from quotationtool.categorization.interfaces import ICategorizableItemDescriptions
     root['descriptions'] = CategorizableItemDescriptions()
-    #sm = root.getSiteManager() # placefull setup
-    #sm.registerUtility(root['descriptions'],
-    #                   ICategorizableItemDescriptions)
-    zope.component.provideUtility(root['descriptions'], ICategorizableItemDescriptions)
+    sm = root.getSiteManager() # placefull setup
+    sm.registerUtility(root['descriptions'], ICategorizableItemDescriptions)
+    #zope.component.provideUtility(root['descriptions'], ICategorizableItemDescriptions)
     setUpZCML(test)
+    hooks.setSite(root)
 
 
-def setUpFieldConfig(test):
+def setUpFieldConfigOFF(test):
     from zope.componentvocabulary.vocabulary import InterfacesVocabulary
     from quotationtool.categorization.weighteditemscontainer import updateWeightedItemsContainerOrder
     from quotationtool.categorization.categorizableitemdescription import CategorizableItemDescriptions, categorizableItemDescriptionVocabulary
@@ -69,9 +70,11 @@ def setUpFieldConfig(test):
                        ICategorizableItemDescriptions)
     
 
-def tearDownContext(test):
+def tearDownFieldConfig(test):
     placefulTearDown()
     tearDown(test)
+    from zope.schema.vocabulary import _clear
+    _clear()
 
 
 def setUpRelationCatalog(test):
@@ -389,13 +392,11 @@ class RelatedAttributionTests(PlacelessSetup, unittest.TestCase):
         tearDown(self)
 
 
-
-
 def test_suite():
     return unittest.TestSuite((
             doctest.DocTestSuite('quotationtool.categorization.field',
                                  setUp = setUpFieldConfig,
-                                 tearDown = tearDownContext,
+                                 tearDown = tearDownFieldConfig,
                                  optionflags=doctest.NORMALIZE_WHITESPACE|doctest.ELLIPSIS,
                                  ),
             doctest.DocFileSuite('workflow.txt',

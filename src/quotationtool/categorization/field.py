@@ -19,17 +19,16 @@ def categoryVocabularyFactory(category_set):
         >>> from quotationtool.categorization.field \
         import categoryVocabularyFactory 
         >>> from quotationtool.categorization.testing \
-        import createSomeCategorySet
-        >>> cs = createSomeCategorySet()
-        >>> cs.__name__ = u'dummy'
-        >>> voc = categoryVocabularyFactory(cs)
+        import generateCategoriesContainer
+        >>> categories = generateCategoriesContainer(root)
+        >>> voc = categoryVocabularyFactory(categories['set1'])
         >>> categories_from_voc = [term.value for term in voc]
-        >>> categories_from_voc == cs.values()
+        >>> categories_from_voc == categories['set1'].values()
         True
 
         >>> titles_tokens = [(term.title, term.token) for term in voc]
         >>> titles_tokens
-        [(u'dummy-philosophy-title', 'philosophy'), (u'dummy-jura-title', 'jura')]
+        [(u'set1-cat11-title', 'cat11'), (u'set1-cat12-title', 'cat12'), (u'set1-cat13-title', 'cat13')]
 
     """
     

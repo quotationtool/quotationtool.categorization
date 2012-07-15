@@ -6,6 +6,8 @@
 
   <include file="dependencies.zcml"/>
 
+  <include file="attribution.zcml"/>
+
   <!-- related to categorizable item description -->
 
   <zope:view

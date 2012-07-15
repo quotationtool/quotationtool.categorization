@@ -43,6 +43,7 @@ def generateCategoriesContainer(root):
     from quotationtool.categorization.interfaces import ICategoriesContainer
     root['categories'] = container = CategoriesContainer()
     if zope.component.interfaces.ISite.providedBy(root):
+        # we have a placeful set up
         sm = root.getSiteManager()
         sm.registerUtility(container, ICategoriesContainer)
     else:
@@ -52,9 +53,26 @@ def generateCategoriesContainer(root):
     from quotationtool.categorization.category import Category
     for i in range(3):
         container['set'+str(i+1)] = catset = CategorySet()
+        catset.title = u"Category Set " + unicode(i+1)
+        catset.description = u"About Category Set " + unicode(i+1)
         for l in range(3):
             catset['cat'+str(i+1)+str(l+1)] = cat = Category()
+            cat.title = u"Category "+unicode(i+1)+unicode(l+1)
+            cat.description = u"About Category "+unicode(i+1)+unicode(l+1)
     return container
+
+
+def generateCategorizableItemDescriptions(root):
+    from quotationtool.categorization.categorizableitemdescription import CategorizableItemDescriptions
+    from quotationtool.categorization.interfaces import ICategorizableItemDescriptions
+    root['descriptions'] = CategorizableItemDescriptions()
+    if zope.component.interfaces.ISite.providedBy(root):
+        # placefull set up
+        sm = root.getSiteManager()
+        sm.registerUtility(root['descriptions'], ICategorizableItemDescriptions)
+    else:
+        zope.component.provideUtility(root['descriptions'], ICategorizableItemDescriptions)
+    return root['descriptions']
 
 
 import random

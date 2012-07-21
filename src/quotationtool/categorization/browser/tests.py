@@ -4,7 +4,7 @@ from zope.component.testing import setUp, tearDown, PlacelessSetup
 from zope.testing.cleanup import cleanUp
 from zope.app.testing.setup import placefulSetUp, placefulTearDown
 from zope.configuration.xmlconfig import XMLConfig
-from zope.component import hooks
+from zope.app.component import hooks
 
 import quotationtool.categorization
 
@@ -12,14 +12,18 @@ from quotationtool.categorization import testing
 from quotationtool.categorization.browser import datamanager
 
 
+def setUpZCML(test):
+    setUp(test)
+    XMLConfig('configure.zcml', quotationtool.categorization)()
+
+
 def setUpDataManager(test):
     tearDownPlaces(test)
     test.globs = {'root': placefulSetUp(True)} # placeful setup
     root = test.globs['root']
+    setUpZCML(test)
     hooks.setSite(root)
     testing.generateCategorizableItemDescriptions(root)
-    XMLConfig('configure.zcml', quotationtool.categorization)()
-
 
 def tearDownPlaces(test):
     placefulTearDown()

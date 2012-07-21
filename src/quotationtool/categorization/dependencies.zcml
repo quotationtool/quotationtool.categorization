@@ -6,6 +6,7 @@
   <include package="zope.securitypolicy" file="meta.zcml"/>
 
   <include package="zope.component"/>
+  <include package="zope.app.schema"/>
   <include package="zope.site"/>
   <include package="zope.security"/>
   <include package="zope.annotation"/>

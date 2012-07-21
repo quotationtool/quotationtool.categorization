@@ -30,45 +30,12 @@ def setUpZCML(test):
 
 def setUpFieldConfig(test):
     test.globs = {'root': placefulSetUp(True)} # placeful setup
-    #placelesssetup.setUp()
-    #test.globs = {'root': rootFolder()}
     root = test.globs['root']
-    from quotationtool.categorization.categorizableitemdescription import CategorizableItemDescriptions
-    from quotationtool.categorization.interfaces import ICategorizableItemDescriptions
-    root['descriptions'] = CategorizableItemDescriptions()
-    sm = root.getSiteManager() # placefull setup
-    sm.registerUtility(root['descriptions'], ICategorizableItemDescriptions)
-    #zope.component.provideUtility(root['descriptions'], ICategorizableItemDescriptions)
     setUpZCML(test)
     hooks.setSite(root)
+    testing.generateCategorizableItemDescriptions(root)
 
 
-def setUpFieldConfigOFF(test):
-    from zope.componentvocabulary.vocabulary import InterfacesVocabulary
-    from quotationtool.categorization.weighteditemscontainer import updateWeightedItemsContainerOrder
-    from quotationtool.categorization.categorizableitemdescription import CategorizableItemDescriptions, categorizableItemDescriptionVocabulary
-    from quotationtool.categorization.interfaces import ICategorizableItemDescriptions
-    from quotationtool.categorization.mode import modeVocabulary
-
-    test.globs = {'root': placefulSetUp(True)} # placeful setup
-    vocabulary.setVocabularyRegistry(vocabulary.VocabularyRegistry())
-    vr = vocabulary.getVocabularyRegistry()
-    vr.register('quotationtool.categorization.mode',
-                modeVocabulary)
-    vr.register('quotationtool.categorization.categorizableitemdescription',
-                categorizableItemDescriptionVocabulary)
-    vr.register('Interfaces',
-                InterfacesVocabulary)
-    from quotationtool.categorization.relatedattribution import RelationIndicesVocabulary
-    vr.register('quotationtool.categorization.RelationIndices',
-                RelationIndicesVocabulary)
-
-    root = test.globs['root']
-    root['descriptions'] = CategorizableItemDescriptions()
-    sm = root.getSiteManager()
-    sm.registerUtility(root['descriptions'],
-                       ICategorizableItemDescriptions)
-    
 
 def tearDownFieldConfig(test):
     placefulTearDown()
@@ -108,7 +75,6 @@ def setUpIntIds(test):
 
 def setUpPlay(test):
     setUpZCML(test)
-    #testing.generateCategoriesContainer(self.root)
     setUpAttributionIndex(test)
     setUpIntIds(test)
 
@@ -125,29 +91,15 @@ def setUpWorkflowConfig(test):
 
 
 def setUpRelatedAttribution(test):
+    placelesssetup.setUp(test)
     setUpZCML(test)
     test.globs['root'] = root = rootFolder()
-    #testing.generateCategorizableItemDescription(root)
-    #testing.generateCategoriesContainer(root)
     setUpAttributionIndex(test)
     setUpIntIds(test)
-    from zope.schema import vocabulary
-    vocabulary.setVocabularyRegistry(vocabulary.VocabularyRegistry())
-    vr = vocabulary.getVocabularyRegistry()
-    #vr.register('quotationtool.categorization.mode',
-    #            modeVocabulary)
-    from zope.app.component.vocabulary import InterfacesVocabulary
-    vr.register('Interfaces',
-                InterfacesVocabulary)
-    from quotationtool.categorization.relatedattribution import RelationIndicesVocabulary
-    vr.register('quotationtool.categorization.RelationIndices',
-                RelationIndicesVocabulary)
-    from quotationtool.categorization.categorizableitemdescription import categorizableItemDescriptionVocabulary
-    vr.register('quotationtool.categorization.categorizableitemdescription',
-                categorizableItemDescriptionVocabulary)
 
 
-
+def tearDownRelatedAttribution(test):
+    placelesssetup.tearDown(test)
 
 
 class SiteCreationTests(PlacelessSetup, unittest.TestCase):
@@ -399,6 +351,11 @@ def test_suite():
                                  tearDown = tearDownFieldConfig,
                                  optionflags=doctest.NORMALIZE_WHITESPACE|doctest.ELLIPSIS,
                                  ),
+            doctest.DocTestSuite('quotationtool.categorization.field',
+                                 setUp = setUpFieldConfig,
+                                 tearDown = tearDownFieldConfig,
+                                 optionflags=doctest.NORMALIZE_WHITESPACE|doctest.ELLIPSIS,
+                                 ),
             doctest.DocFileSuite('workflow.txt',
                                  setUp = setUpWorkflowConfig,
                                  tearDown = tearDown,
@@ -406,7 +363,7 @@ def test_suite():
                                  ),
             doctest.DocFileSuite('relatedattribution.txt',
                                  setUp = setUpRelatedAttribution,
-                                 tearDown = tearDown,
+                                 tearDown = tearDownRelatedAttribution,
                                  optionflags = doctest.NORMALIZE_WHITESPACE|doctest.ELLIPSIS,
                                  ),
             doctest.DocFileSuite('play.txt',

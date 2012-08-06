@@ -69,9 +69,8 @@ And we assert that the relation catalog works:
 True
 
 
->>> from quotationtool.categorization.categorizableitemdescription import CategorizableItemDescription, CategorizableItemDescriptions
->>> descriptions = CategorizableItemDescriptions()
->>> zope.component.provideUtility(descriptions, interfaces.ICategorizableItemDescriptions)
+>>> descriptions = testing.generateCategorizableItemDescriptions(root)
+>>> from quotationtool.categorization.categorizableitemdescription import CategorizableItemDescription
 >>> descriptions['desc1'] = desc1 = CategorizableItemDescription()
 >>> zope.component.interface.provideInterface('IBar', IBar)
 >>> desc1.interface = IBar

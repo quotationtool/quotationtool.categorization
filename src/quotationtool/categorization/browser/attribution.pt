@@ -1,19 +1,6 @@
 <div i18n:domain="quotationtool" id="attribution">
-  <metal:block use-macro="macro:form">
-
-    <metal:block fill-slot="label">
-      <h1 tal:condition="view/label|nothing"
-	  tal:content="view/label">
-        Categorization
-      </h1>
-    </metal:block>
  
-    <div metal:fill-slot="info">
-      <!--div class="content-item-details" 
-	  tal:content="structure context/@@details|nothing">
-	Author: Title...
-      </div-->
-      <metal:block define-macro="attribution-desc">
+    <div metal:define-macro="attribution-desc">
       <p class="attribution-desc">
 	<span i18n:translate="attribution-desc">
 	  The form below asks for a categorization of this item. The
@@ -26,12 +13,10 @@
 	  [more]
 	</a>
       </p>
-      </metal:block>
     </div>
 
-    <div metal:fill-slot="main" id="attribution-rows">
-    <metal:block define-macro="attribution-rows">
-              <tal:block repeat="widget view/widgets/values">
+    <div metal:define-macro="attribution-rows" id="attribution-rows">
+        <tal:block repeat="widget view/widgets/values">
           <div id="" class="row"
                tal:attributes="id string:${widget/id}-row"
                tal:condition="python:widget.mode != 'hidden'">
@@ -69,10 +54,6 @@
                  tal:condition="python:widget.mode == 'hidden'"
                  tal:replace="structure widget/render" />
         </tal:block>
-    </metal:block>
     </div>
 
-
-
-  </metal:block>
 </div>

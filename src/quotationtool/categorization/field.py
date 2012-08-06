@@ -1,5 +1,3 @@
-import md5
-
 import zope.interface
 import zope.component
 import zope.schema

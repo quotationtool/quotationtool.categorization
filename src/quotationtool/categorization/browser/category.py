@@ -26,21 +26,6 @@ class DetailsView(BrowserView):
         return self.template()
 
 
-class DetailsViewOFF(DisplayForm):
-    """Display a category object.
-    """
-
-    label = _('category-details-label',
-              u"Category")
-
-    fields = field.Fields(interfaces.ICategory).omit(
-        '__name__', '__parent__','items_weight_attribute')
-
-    def __call__(self):
-        self.update()
-        return self.render()
-
-
 class LabelView(BrowserView):
     """ The label of a category."""
     
@@ -54,18 +39,6 @@ class LabelView(BrowserView):
 
 class AddCategory(form.AddForm):
     """Add a new category object to a categoryset container.
-
-        >>> from z3c.form.testing import setupFormDefaults, TestRequest
-        >>> setupFormDefaults()
-        >>> request = TestRequest()
-        >>> from quotationtool.categorization.browser.category \
-                import AddCategory
-        >>> form = AddCategory(root, request)
-        >>> form.update()
-
-        >>> form.widgets.keys()
-        ['weight', 'title', 'description']
-
     """
 
     zope.interface.implements(ITabbedContentLayout)

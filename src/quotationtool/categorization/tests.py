@@ -162,6 +162,7 @@ class CategoriesContainerTests(PlacelessSetup, unittest.TestCase):
         super(CategoriesContainerTests, self).setUp()
         setUpZCML(self)
         self.root = rootFolder()
+        testing.generateCategorizableItemDescriptions(self.root)
         testing.generateCategoriesContainer(self.root)
         setUpAttributionIndex(self)
         setUpRelatedAttributionIndex(self)
@@ -206,6 +207,7 @@ class AttributionTests(PlacelessSetup, unittest.TestCase):
         setUpZCML(self)
         self.root = rootFolder()
         setUpIntIds(self)
+        testing.generateCategorizableItemDescriptions(self.root)
         testing.generateCategoriesContainer(self.root)
         setUpAttributionIndex(self)
         setUpRelatedAttributionIndex(self)
@@ -325,6 +327,24 @@ class AttributionTests(PlacelessSetup, unittest.TestCase):
         result = query.apply()
         self.assertTrue(len(result) == 1)
 
+
+class CategorizableItemDescriptionTests(placelesssetup.PlacelessSetup, unittest.TestCase):
+
+    def setUp(self):
+        super(CategorizableItemDescriptionTests, self).setUp()
+        self.root = placefulSetUp(True)
+        setUpZCML(self)
+
+    def tearDown(self):
+        placefulTearDown()
+        super(CategorizableItemDescriptionTests, self).tearDown()
+
+    def test_generation(self):
+        """ We had some problems with placeful setup so this should be
+        tested."""
+        testing.generateCategorizableItemDescriptions(self.root)
+
+
         
 class RelatedAttributionTests(PlacelessSetup, unittest.TestCase):
 
@@ -333,6 +353,7 @@ class RelatedAttributionTests(PlacelessSetup, unittest.TestCase):
         setUpZCML(self)
         self.root = rootFolder()
         setUpIntIds(self)
+        testing.generateCategorizableItemDescriptions(self.root)
         testing.generateCategoriesContainer(self.root)
         setUpAttributionIndex(self)
         setUpRelatedAttributionIndex(self)
@@ -346,11 +367,6 @@ class RelatedAttributionTests(PlacelessSetup, unittest.TestCase):
 
 def test_suite():
     return unittest.TestSuite((
-            doctest.DocTestSuite('quotationtool.categorization.field',
-                                 setUp = setUpFieldConfig,
-                                 tearDown = tearDownFieldConfig,
-                                 optionflags=doctest.NORMALIZE_WHITESPACE|doctest.ELLIPSIS,
-                                 ),
             doctest.DocTestSuite('quotationtool.categorization.field',
                                  setUp = setUpFieldConfig,
                                  tearDown = tearDownFieldConfig,
@@ -374,6 +390,7 @@ def test_suite():
             unittest.makeSuite(AttributionTests),
             unittest.makeSuite(SiteCreationTests),
             unittest.makeSuite(CategoriesContainerTests),
+            unittest.makeSuite(CategorizableItemDescriptionTests),
             #doctest.DocFileSuite('README.txt',
             #                     setUp = setUpWithContext,
             #                     tearDown = tearDownContext,

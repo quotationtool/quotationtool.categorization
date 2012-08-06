@@ -3,6 +3,95 @@
     xmlns:z3c="http://namespaces.zope.org/z3c"
     >
 
+  <!-- display form -->
+
+  <z3c:pagelet
+      for="..interfaces.ICategorizable"
+      name="attribution.html"
+      class=".attribution.AttributionDisplayForm"
+      layer="quotationtool.skin.interfaces.IQuotationtoolBrowserLayer"
+      permission="quotationtool.categorization.Read"
+      />
+  <z3c:template
+      for=".attribution.AttributionDisplayForm"
+      layer="quotationtool.skin.interfaces.IQuotationtoolBrowserLayer"
+      template="attribution_display.pt"
+      />
+
+  <!-- form for workitems -->
+
+  <!--z3c:pagelet
+      for="..interfaces.ICategorizable"
+      name="doAttribution.html"
+      class=".attribution.AttributionForm"
+      layer="quotationtool.skin.interfaces.IQuotationtoolBrowserLayer"
+      permission="quotationtool.categorization.DoAttribution"
+      /-->
+  
+  <z3c:template
+      for=".attribution.ClassificationForm"
+      layer="quotationtool.skin.interfaces.IQuotationtoolBrowserLayer"
+      template="workitem.pt"
+      />
+
+  <z3c:template
+      for=".attribution.AttributionSubForm"
+      layer="quotationtool.skin.interfaces.IQuotationtoolBrowserLayer"
+      template="attribution.pt"
+      />
+  <z3c:macro
+      name="attribution-desc"
+      template="attribution.pt"
+      layer="quotationtool.skin.interfaces.IQuotationtoolBrowserLayer"
+      />
+  <z3c:macro
+      name="attribution-rows"
+      template="attribution.pt"
+      layer="quotationtool.skin.interfaces.IQuotationtoolBrowserLayer"
+      />
+
+  <!-- widgets -->
+
+  <class 
+      class=".widget.ExclusiveAttributionWidget">
+    <require
+        permission="zope.Public"
+        interface=".widget.IExclusiveAttributionWidget"
+        />
+  </class>
+
+  <adapter
+      factory=".widget.ExclusiveAttributionFieldWidget"
+      />
+
+  <z3c:widgetTemplate
+      mode="display"
+      template="exclusive.pt"
+      layer="z3c.form.interfaces.IFormLayer"
+      widget="quotationtool.categorization.browser.widget.IExclusiveAttributionWidget"
+      />
+
+  <class 
+      class=".widget.NonExclusiveAttributionWidget">
+    <require
+        permission="zope.Public"
+        interface=".widget.INonExclusiveAttributionWidget"
+        />
+  </class>
+
+  <adapter
+      factory=".widget.NonExclusiveAttributionFieldWidget"
+      />
+
+  <z3c:widgetTemplate
+      mode="display"
+      template="nonexclusive.pt"
+      layer="z3c.form.interfaces.IFormLayer"
+      widget=".widget.INonExclusiveAttributionWidget"
+      />
+
+  <!-- datamanagers -->
+
   <adapter
       for="..interfaces.ICategorizable
 	   ..interfaces.INonExclusiveAttributionField"

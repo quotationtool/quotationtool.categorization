@@ -135,10 +135,10 @@ True
 
 >>> proc.activities.get(proc.nextActivityId)
 
-There is still the contributor activity. Should be remove it?
-
 >>> proc.activities
     {}
+
+Once, there was still the contributor activity. We fixed that!
 
     {6: Activity('quotationtool.classify.contribution')}
 

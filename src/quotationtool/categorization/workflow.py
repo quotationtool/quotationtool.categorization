@@ -64,7 +64,7 @@ class ClassificationContext(Persistent, wp29.CancellingContext):
         annotation = interfaces.IAttribution(self.item)
         annotation.set(self.object_.get())
         zope.event.notify(interfaces.AttributionModifiedEvent(self.item))
-        #raise Exception(self.object_.get())
+        #raise Exception(self.object_)
 
 
 def classifySubscriber(item, event):

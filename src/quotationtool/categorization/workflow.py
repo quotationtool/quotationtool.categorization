@@ -5,6 +5,8 @@ import zope.event
 from persistent import Persistent
 from zope.security.management import getInteraction
 import datetime
+from zope.publisher.interfaces import IRequest
+from zope.security.interfaces import IPrincipal
 
 from quotationtool.workflow import wp29
 from quotationtool.workflow.interfaces import IWorkflowHistory
@@ -76,7 +78,10 @@ def classifySubscriber(item, event):
     process = pd(context)
     contributor = u"unkown"
     for principal in getInteraction().participations:
-        contributor = principal.id
+        if IPrincipal.providedBy(principal):
+            contributor = principal.id
+        elif IRequest.providedBy(principal):
+            contributor = principal.principal.id
         break
     history = IWorkflowHistory(item)
     process.start(contributor, 

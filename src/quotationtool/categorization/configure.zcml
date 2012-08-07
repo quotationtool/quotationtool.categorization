@@ -213,6 +213,8 @@
 	interface=".interfaces.IWriteAttribution"
 	permission="quotationtool.categorization.DoAttribution"
 	/>
+    <allow
+	attributes="attribution_factory"/>
   </class>
 
   <subscriber
@@ -239,7 +241,20 @@
       handler=".attribution.removeAttributionSubscriber"/>
   <subscriber
       handler=".attribution.moveAttributionSubscriber"/>
-  
+
+  <class class=".attribution.PersistentAttribution">
+    <allow
+	interface=".interfaces.IReadAttribution"/>
+    <!--require TODO: allow is not ok here
+	permission="quotationtool.categorization.DoAttribution"
+	interface=".interfaces.IWriteAttribution"
+	/-->
+    <allow
+	interface=".interfaces.IWriteAttribution"/>
+    <allow
+	attributes="attribution_factory"/>
+  </class>
+
 
   <!-- related attribution -->
 
@@ -316,12 +331,40 @@
       provides="zope.wfmc.interfaces.IWorkItem"
       name="quotationtool.classify.editorbranch"
       />
-     
+  <class class=".workflow.EditorClassification">
+    <implements
+	interface="zope.annotation.interfaces.IAttributeAnnotatable"/>
+    <allow
+	interface="zope.wfmc.interfaces.IWorkItem"/>
+    <allow
+	interface="quotationtool.workflow.interfaces.IStandardParameters"/>
+    <allow
+	interface="quotationtool.workflow.interfaces.IObjectParameter"/>
+    <require
+	attributes="finish"
+	permission="quotationtool.workflow.DoEditorialReview"
+	/>
+  </class>
+  
   <adapter
       factory=".workflow.ContributorClassification"
       provides="zope.wfmc.interfaces.IWorkItem"
       name="quotationtool.classify.contributorbranch"
       />
+  <class class=".workflow.ContributorClassification">
+    <implements
+	interface="zope.annotation.interfaces.IAttributeAnnotatable"/>
+    <allow
+	interface="zope.wfmc.interfaces.IWorkItem"/>
+    <allow
+	interface="quotationtool.workflow.interfaces.IStandardParameters"/>
+    <allow
+	interface="quotationtool.workflow.interfaces.IObjectParameter"/>
+    <require
+	attributes="finish"
+	permission="quotationtool.workflow.Contribute"
+	/>
+  </class>
      
   <adapter
       for="zope.wfmc.interfaces.IParticipant"
@@ -343,6 +386,20 @@
       factory=".workflow.EditorialReview"
       name="quotationtool.classify.review"
       />
+  <class class=".workflow.EditorialReview">
+    <implements
+	interface="zope.annotation.interfaces.IAttributeAnnotatable"/>
+    <allow
+	interface="zope.wfmc.interfaces.IWorkItem"/>
+    <allow
+	interface="quotationtool.workflow.interfaces.IStandardParameters"/>
+    <allow
+	interface="quotationtool.workflow.interfaces.IObjectParameter"/>
+    <require
+	attributes="finish"
+	permission="quotationtool.workflow.DoEditorialReview"
+	/>
+  </class>
 
   <adapter
       for="zope.wfmc.interfaces.IParticipant"

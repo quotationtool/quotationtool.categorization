@@ -1,7 +1,7 @@
 <div i18n:domain="quotationtool" id="attribution">
  
     <div metal:define-macro="attribution-desc">
-      <p class="attribution-desc">
+      <!--p class="attribution-desc">
 	<span i18n:translate="attribution-desc">
 	  The form below asks for a categorization of this item. The
 	  categories (classes) given in the form were defined by users of this
@@ -12,7 +12,7 @@
 	     i18n:translate="more-link">
 	  [more]
 	</a>
-      </p>
+      </p-->
     </div>
 
     <div metal:define-macro="attribution-rows" id="attribution-rows">

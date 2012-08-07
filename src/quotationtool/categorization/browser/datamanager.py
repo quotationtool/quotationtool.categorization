@@ -31,11 +31,15 @@ class NonExclusiveAttributionDataManager(object):
 
         >>> from quotationtool.categorization.browser import datamanager
         >>> dm = datamanager.NonExclusiveAttributionDataManager(item, fld)
-        >>> dm.get()
-        ['cat11', 'cat12']
+        >>> categories['set1']['cat11'] in dm.get()
+        True
+        >>> categories['set1']['cat12'] in dm.get()
+        True
+        >>> categories['set1']['cat13'] in dm.get()
+        False
 
-        >>> dm.query(default=None)
-        ['cat11', 'cat12']
+        >>> dm.query(default=None) == dm.get()
+        True
 
         >>> dm.set(('cat13',))
         >>> list(attribution.get())
@@ -48,6 +52,9 @@ class NonExclusiveAttributionDataManager(object):
         >>> dm.set(())
         >>> list(attribution.get())
         ['cat21', 'cat23', 'cat31']
+
+        >>> dm.get()
+        []
 
     The data manager can be looked up as a multiadapter.
 
@@ -64,19 +71,24 @@ class NonExclusiveAttributionDataManager(object):
 
     zope.interface.implements(IDataManager)
 
-    intersection = BTrees.family32.OO.intersection
-
     def __init__(self, context, field):
         self.context = context
         self.field = field
         self.category_set = field.category_set
 
     def get(self):
-        attribution = interfaces.IAttribution(self.context)
-        cats = attribution.attribution_factory(self.category_set.keys())
-        return list(self.intersection(attribution.attribution_factory(attribution.get()), cats))
+        attribution = list(interfaces.IAttribution(self.context).get())
+        vocabulary = self.field.value_type.vocabulary
+        rc = []
+        for term in vocabulary:
+            if term.token in attribution:
+                rc.append(term.value)
+        return rc
 
     def query(self, default=NO_VALUE):
+        return self.get()
+
+    def queryOFF(self, default=NO_VALUE):
         try:
             return self.get()
         except Exception:
@@ -106,7 +118,7 @@ class NonExclusiveAttributionDataManager(object):
 
 
 class ExclusiveAttributionDataManager(NonExclusiveAttributionDataManager):
-    """ Data manager that adapts to ..field.ExclusiveAttributionField.
+    """ Data manager that adapts to field.ExclusiveAttributionField.
 
     """
 

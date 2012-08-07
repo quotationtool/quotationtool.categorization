@@ -81,7 +81,7 @@
   <zope:adapter
       for="..interfaces.ICategorizable
 	   zope.publisher.interfaces.browser.IBrowserRequest
-	   .attribution.AttributionDisplayForm
+	   .attribution.DisplayForm
 	   quotationtool.skin.interfaces.IItemTabs
 	   .tabs.IAttributionTab"
       provides="z3c.menu.ready2go.interfaces.ISelectedChecker"

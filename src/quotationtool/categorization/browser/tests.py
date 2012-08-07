@@ -92,28 +92,35 @@ class AttributionTests(placelesssetup.PlacelessSetup, unittest.TestCase):
 
     def test_DisplayForm(self):
         from quotationtool.categorization.browser import attribution
-        classifySubscriber(self.root['item'], None)
-        pagelet = attribution.AttributionDisplayForm(self.root['item'], TestRequest())
+        #classifySubscriber(self.root['item'], None)
+        pagelet = attribution.DisplayForm(self.root['item'], TestRequest())
         pagelet.update()
-        from zope.location.interfaces import LocationError
-        self.assertRaises(LocationError, pagelet.render) # TODO
+        self.assertTrue(isinstance(pagelet.render(), unicode))
         self.assertTrue(len(pagelet.widgets.values()) > 0)
         for cat in self.root['categories'].keys():
             self.assertTrue(cat in pagelet.widgets.keys())
 
+    def test_DisplayFormWidgetValue(self):
+        from quotationtool.categorization.browser import attribution
+        attr = interfaces.IAttribution(self.root['item'])
+        attr.set(['cat12'])
+        pagelet = attribution.DisplayForm(self.root['item'], TestRequest())
+        pagelet.update()
+        self.assertTrue(pagelet.widgets['set1'].value == ['cat12'])
+        self.assertTrue(u"checked=\"checked\"" in pagelet.render())
+
     def test_WorkItem(self):
         from quotationtool.categorization.browser import attribution
         classifySubscriber(self.root['item'], None)
-        pagelet = attribution.ClassificationForm(self.editor_items.pop(), TestRequest())
+        pagelet = attribution.EditorBranchForm(
+            self.editor_items.pop(), TestRequest())
         pagelet.update()
-        self.assertTrue(isinstance(pagelet.attribution.getContent(),testing.Categorizable))
+        self.assertTrue(isinstance(pagelet.attribution.getCategorizableItem(), testing.Categorizable))
         for cat in self.root['categories'].keys():
             self.assertTrue(cat in pagelet.attribution.widgets.keys())
-        from zope.location.interfaces import LocationError
-        self.assertRaises(LocationError, pagelet.render) # TODO
-        #raise Exception([widget.name for widget in pagelet.attribution.widgets.values()])
+        self.assertTrue(isinstance(pagelet.render(), unicode))
         
-    def test_ApplyAttribution(self):
+    def test_FinishAttribution(self):
         from quotationtool.categorization.browser import attribution
         classifySubscriber(self.root['item'], None)
         request = TestRequest(form={
@@ -121,8 +128,9 @@ class AttributionTests(placelesssetup.PlacelessSetup, unittest.TestCase):
                 'attribution.widgets.set2': u'cat23',
                 'attribution.widgets.set3': u'cat33',
                 'form.widgets.workflow-message': u'OK?',
-                'form.buttons.apply': u"Apply"})
-        pagelet = attribution.ClassificationForm(self.editor_items.pop(), request)
+                'form.buttons.finish': u"Finish"})
+        pagelet = attribution.EditorBranchForm(
+            self.editor_items.pop(), request)
         pagelet.update()
         self.assertTrue(interfaces.IAttribution(self.root['item']).isAttributed('cat13'))
         self.assertTrue(interfaces.IAttribution(self.root['item']).isAttributed('cat23'))
@@ -139,7 +147,7 @@ class AttributionTests(placelesssetup.PlacelessSetup, unittest.TestCase):
                 'attribution.widgets.set3': u'cat33',
                 'form.widgets.workflow-message': u'OK?',
                 'form.buttons.postpone': u"Postpone"})
-        pagelet = attribution.ClassificationForm(self.editor_items.pop(), request)
+        pagelet = attribution.EditorBranchForm(self.editor_items.pop(), request)
         pagelet.update()
         self.assertTrue(len(self.editor_items.values()) == 1)
         next = self.editor_items.pop()

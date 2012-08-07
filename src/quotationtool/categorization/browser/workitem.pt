@@ -1,21 +1,37 @@
-<metal:macro use-macro="macro:form" i18n:domain="quotationtool">
+<div class="attribution-form" i18n:domain="quotationtool">
+  <metal:macro use-macro="macro:form">
   
   <div metal:fill-slot="extra-info" class="remove-work-item">
     <div metal:use-macro="macro:workitem-info"/>
-    <!--div metal:use-macro="macro:workitem-object"/-->
-    <div metal:use-macro="macro:workitem-history"/>
-    <div metal:use-macro="macro:workitem-message"/>
+    <div metal:define-macro="workflow-context-item" 
+        class="workitem-object" tal:define="item python:view.attribution.getCategorizableItem()">
+      <h3 i18n:translate="">Database Item:</h3>
+      <div class="details" tal:content="structure item/@@details"/>
+      <div class="object-link">
+        <a class="internal" href=""
+           tal:attributes="href item/@@absolute_url"
+           tal:content="item/@@label">Label</a>
+      </div>
+    </div>
+    <!--div metal:use-macro="macro:workitem-history"/-->
   </div>
 
   <metal:slot fill-slot="main">
  
-   <fieldset>
-      <legend>Attribution</legend>
+   <fieldset class="attribution-subform">
+      <legend 
+	  i18n:translate=""
+	  title="Please select category labels"
+	  i18n:attributes="title attribution-subform-legend-title"
+	  >Category Labels</legend>
       <div tal:replace="structure view/attribution/render"/>
-    </fieldset>
+   </fieldset>
 
-    <metal:macro use-macro="macro:widget-rows"/>
+   <div metal:use-macro="macro:workitem-message"/>
+   
+   <metal:macro use-macro="macro:widget-rows"/>
 
   </metal:slot>
  
-</metal:macro>
+  </metal:macro>
+</div>

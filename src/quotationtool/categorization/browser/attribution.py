@@ -5,6 +5,9 @@ from z3c.formui import form
 from z3c.form import field, button, subform
 from cgi import escape
 from zope.traversing.browser import absoluteURL
+from zope.proxy import removeAllProxies
+from zope.i18n import translate
+from zope.publisher.browser import BrowserView
 
 from quotationtool.skin.interfaces import ITabbedContentLayout
 from quotationtool.workflow.interfaces import IWorkItemForm
@@ -17,15 +20,21 @@ from quotationtool.categorization.interfaces import _
 
 class AttributionFieldsMixin(object):
 
+    def getCategorizableItem(self):
+        """ The categorizable item is needed to determine the category
+        sets that can be applied."""
+        return self.context
+
+    @property
     def fields(self):
         flds = field.Fields()
         categories = zope.component.getUtility(
             interfaces.ICategoriesContainer,
-            context = self.getContent())
+            context = self.getCategorizableItem())
         for category_set in categories.values():
             # only create widget if category vector is applicable to context 
             for iface in category_set.categorizable_items:
-                if iface in zope.interface.providedBy(self.getContent()):
+                if iface in zope.interface.providedBy(self.getCategorizableItem()):
                     # lookup an adapter depending on mode
                     if category_set.mode == 'exclusive':
                         fld = interfaces.IExclusiveAttributionField(category_set)
@@ -36,10 +45,9 @@ class AttributionFieldsMixin(object):
                     fld.__name__ = category_set.__name__.encode('ascii','xmlcharrefreplace')
                     flds += field.Fields(fld)
         return flds
-    fields = property(fields)
 
     
-class AttributionDisplayForm(AttributionFieldsMixin, form.DisplayForm):
+class DisplayForm(AttributionFieldsMixin, form.DisplayForm):
     """Show the attributions on a categorizable object.
     """
     
@@ -47,6 +55,8 @@ class AttributionDisplayForm(AttributionFieldsMixin, form.DisplayForm):
 
     label = _('attribution-label',
               u"Categorization")
+
+    ignoreContext = False
 
 
 class AttributionSubForm(AttributionFieldsMixin, subform.EditSubForm):
@@ -56,13 +66,12 @@ class AttributionSubForm(AttributionFieldsMixin, subform.EditSubForm):
     
     prefix = 'attribution'
 
-    label = _('attribution-edit-label',
-              u"Edit Categorization")
-
     def getContent(self):
-        # We need the categorizable item to determine the category
-        # sets that can be applied.
-        return self.context.participant.activity.process.context.item
+        return self.context.object_
+
+    def getCategorizableItem(self):
+        ctxt = removeAllProxies(self.context)
+        return ctxt.participant.activity.process.context.item
 
     def storeToWorkItem(self):
         data, errors = self.extractData()
@@ -78,21 +87,25 @@ comment = zope.schema.Text(
             u"Message"),
     description=_('classification-comment-desc',
                   u"If you want to leave a message about your decisions you can leave it here."),
-    required=True,
+    required=False,
     )
 comment.__name__ = 'workflow-message'
 
 
-class ClassificationForm(AttributionFieldsMixin, form.Form):
+class WorkItemBaseForm(AttributionFieldsMixin, form.Form):
 
     zope.interface.implements(IWorkItemForm)
 
     fields = field.Fields(comment)
 
-    label = info = 'TODO'
+    label = info = 'NOT DEFINED'
+    
+    ignoreContext = True
+    ignoreReadOnly = True
     
     def update(self):
-        super(ClassificationForm, self).update()
+        super(WorkItemBaseForm, self).update()
+        #self.widgets['workflow-message'].ignoreContext = True
         self.updateAttributionSubForm()
 
     def updateAttributionSubForm(self):
@@ -115,11 +128,32 @@ class ClassificationForm(AttributionFieldsMixin, form.Form):
         self.context.finish(finish_value, data['workflow-message'])
         self.request.response.redirect(url)
 
-    @button.buttonAndHandler(_(u"Apply"), name="apply")
+    def contributor(self):
+        return common.getPrincipalTitle(self.context.contributor)
+
+    def message(self):
+        message = getattr(self.context, 'message', u"")
+        if not message: message = u""
+        return escape(message).replace('\n', '<br />')
+
+    def nextURL(self):
+        return absoluteURL(self.context.__parent__, self.request)
+
+
+class EditorBranchForm(WorkItemBaseForm):
+    """ For editorial review."""
+
+    label = _('attribution-editorbranch-label',
+              u"Categorization Task")
+
+    info = _('attribution-editorbranch-info',
+             u"The database item below has been created recently and has not yet been categorized. Please select category labels from the form below.") 
+
+    @button.buttonAndHandler(_(u"Finish (Save to item)"), name="finish")
     def handleApply(self, action):
         self._handle('finish')
 
-    @button.buttonAndHandler(_(u"Postpone"), name="postpone")
+    @button.buttonAndHandler(_(u"Postpone (Save as draft)"), name="postpone")
     def handlePostpone(self, action):
         self._handle('postpone')
 
@@ -127,11 +161,51 @@ class ClassificationForm(AttributionFieldsMixin, form.Form):
     def handleCancel(self, action):
         self.request.response.redirect(self.nextURL())
 
-    def contributor(self):
-        return common.getPrincipalTitle(self.context.contributor)
 
-    def message(self):
-        return escape(self.context.message).replace('\n', '<br />')
+class EditorialReviewForm(EditorBranchForm):
+    """ For the editorial review in the split branch."""
 
-    def nextURL(self):
-        return absoluteURL(self.context.__parent__, self.request)
+    info = _('attribution-editorial-review-info',
+             u"The database item below has recently been created and categorized by a user. Please review the selection of category labels in the form below.") 
+
+
+class ContributorBranchForm(WorkItemBaseForm):
+    """ For contributor work item in the split branch."""
+
+    label = EditorBranchForm.label
+    info = EditorBranchForm.info
+
+    @button.buttonAndHandler(_(u"Finish"), name="finish")
+    def handleApply(self, action):
+        self._handle('finish')
+
+    @button.buttonAndHandler(_(u"Postpone (Save as draft)"), name="postpone")
+    def handlePostpone(self, action):
+        self._handle('postpone')
+
+    @button.buttonAndHandler(_(u"Cancel"), name="cancel")
+    def handleCancel(self, action):
+        self.request.response.redirect(self.nextURL())
+
+
+class CategorizationProcessName(BrowserView):
+    """ A nice process name for the worklist."""
+
+    def __call__(self):
+        return _(u"Categorization")
+
+
+class ObjectLabel(BrowserView):
+    """ A label used in the ObjectLabelColumn of a worklist table."""
+    
+    def __call__(self):
+        ctxt = removeAllProxies(self.context)
+        item = ctxt.participant.activity.process.context.item
+        label =  zope.component.queryMultiAdapter(
+            (item, self.request), name='label')
+        if not label:
+            return _(u"Unkown")
+        try:
+            return translate(label(), context=self.request)
+        except Exception:
+            return label()

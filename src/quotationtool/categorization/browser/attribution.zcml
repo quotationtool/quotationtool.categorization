@@ -8,28 +8,44 @@
   <z3c:pagelet
       for="..interfaces.ICategorizable"
       name="attribution.html"
-      class=".attribution.AttributionDisplayForm"
+      class=".attribution.DisplayForm"
       layer="quotationtool.skin.interfaces.IQuotationtoolBrowserLayer"
       permission="quotationtool.categorization.Read"
       />
   <z3c:template
-      for=".attribution.AttributionDisplayForm"
+      for=".attribution.DisplayForm"
       layer="quotationtool.skin.interfaces.IQuotationtoolBrowserLayer"
       template="attribution_display.pt"
       />
 
-  <!-- form for workitems -->
+  <!-- forms for workitems -->
 
-  <!--z3c:pagelet
-      for="..interfaces.ICategorizable"
-      name="doAttribution.html"
-      class=".attribution.AttributionForm"
+  <z3c:pagelet
+      for="..workflow.EditorClassification"
+      name="index.html"
+      class=".attribution.EditorBranchForm"
       layer="quotationtool.skin.interfaces.IQuotationtoolBrowserLayer"
-      permission="quotationtool.categorization.DoAttribution"
-      /-->
+      permission="quotationtool.workflow.DoEditorialReview"
+      />
+  
+  <z3c:pagelet
+      for="..workflow.EditorialReview"
+      name="index.html"
+      class=".attribution.EditorialReviewForm"
+      layer="quotationtool.skin.interfaces.IQuotationtoolBrowserLayer"
+      permission="quotationtool.workflow.DoEditorialReview"
+      />
+  
+  <z3c:pagelet
+      for="..workflow.ContributorClassification"
+      name="index.html"
+      class=".attribution.ContributorBranchForm"
+      layer="quotationtool.skin.interfaces.IQuotationtoolBrowserLayer"
+      permission="quotationtool.workflow.Contribute"
+      />
   
   <z3c:template
-      for=".attribution.ClassificationForm"
+      for=".attribution.WorkItemBaseForm"
       layer="quotationtool.skin.interfaces.IQuotationtoolBrowserLayer"
       template="workitem.pt"
       />
@@ -49,6 +65,24 @@
       template="attribution.pt"
       layer="quotationtool.skin.interfaces.IQuotationtoolBrowserLayer"
       />
+
+  <!-- labels for work items -->
+
+  <view
+      for="..interfaces.IClassificationWorkItem"
+      name="objectLabel"
+      factory=".attribution.ObjectLabel"
+      type="quotationtool.skin.interfaces.IQuotationtoolBrowserLayer"
+      permission="zope.View"
+      />
+
+  <view
+      for="..interfaces.IClassificationWorkItem"
+      name="processName"
+      factory=".attribution.CategorizationProcessName"
+      type="quotationtool.skin.interfaces.IQuotationtoolBrowserLayer"
+      permission="zope.View"
+      />  
 
   <!-- widgets -->
 
@@ -101,6 +135,20 @@
 
   <adapter
       for="..interfaces.ICategorizable
+	   ..interfaces.IExclusiveAttributionField"
+      provides="z3c.form.interfaces.IDataManager"
+      factory=".datamanager.ExclusiveAttributionDataManager"
+      />
+
+  <adapter
+      for="..interfaces.IAttribution
+	   ..interfaces.INonExclusiveAttributionField"
+      provides="z3c.form.interfaces.IDataManager"
+      factory=".datamanager.NonExclusiveAttributionDataManager"
+      />
+
+  <adapter
+      for="..interfaces.IAttribution
 	   ..interfaces.IExclusiveAttributionField"
       provides="z3c.form.interfaces.IDataManager"
       factory=".datamanager.ExclusiveAttributionDataManager"

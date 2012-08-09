@@ -99,6 +99,9 @@ True
 >>> #contr.finish('finish', u'Done')
 
 >>> editr = editor_items.pop()
+>>> editr.message
+    'Some message'
+
 >>> editr.finish('finish', u'Done') 
     <...
     WorkItemFinished(u'editorbranch')
@@ -195,6 +198,9 @@ Test editorial review
     ...
 
 >>> contr = contributor_items.pop()
+>>> contr.message
+    'message'
+
 >>> contr.finish('finish', 'Done')
     <...
     WorkItemFinished(u'contributorbranch')
@@ -221,6 +227,9 @@ True
 True
 
 >>> editr = editor_items.pop()
+>>> editr.message
+    'Done'
+
 >>> editr.finish('publish', u'OK')
     <...
     WorkItemFinished(u'review')

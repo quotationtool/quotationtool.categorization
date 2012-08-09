@@ -120,7 +120,7 @@ class AttributionTests(placelesssetup.PlacelessSetup, unittest.TestCase):
             self.assertTrue(cat in pagelet.attribution.widgets.keys())
         self.assertTrue(isinstance(pagelet.render(), unicode))
         
-    def test_FinishAttribution(self):
+    def test_FinishedEditorItem(self):
         from quotationtool.categorization.browser import attribution
         classifySubscriber(self.root['item'], None)
         request = TestRequest(form={
@@ -138,7 +138,7 @@ class AttributionTests(placelesssetup.PlacelessSetup, unittest.TestCase):
         self.assertTrue(not interfaces.IAttribution(self.root['item']).isAttributed('cat11'))
         self.assertTrue(len(self.editor_items.values()) == 0)
 
-    def test_PostponeAttribution(self):
+    def test_PostponedEditorItem(self):
         from quotationtool.categorization.browser import attribution
         classifySubscriber(self.root['item'], None)
         request = TestRequest(form={
@@ -156,6 +156,46 @@ class AttributionTests(placelesssetup.PlacelessSetup, unittest.TestCase):
         self.assertTrue(next.object_.isAttributed('cat33'))
         # but not saved to item:
         self.assertTrue(not interfaces.IAttribution(self.root['item']).isAttributed('cat13'))
+
+    def test_FinishedContributorItem(self):
+        from quotationtool.categorization.browser import attribution
+        classifySubscriber(self.root['item'], None)
+        request = TestRequest(form={
+                'attribution.widgets.set1': u'cat13',
+                'attribution.widgets.set2': u'cat23',
+                'attribution.widgets.set3': u'cat33',
+                'form.widgets.workflow-message': u'OK?',
+                'form.buttons.finish': u"Finish"})
+        pagelet = attribution.ContributorBranchForm(
+            self.contributor_items.pop(), request)
+        pagelet.update()
+        self.assertTrue(interfaces.IAttribution(self.root['item']).isAttributed('cat13'))
+        self.assertTrue(interfaces.IAttribution(self.root['item']).isAttributed('cat23'))
+        self.assertTrue(interfaces.IAttribution(self.root['item']).isAttributed('cat33'))
+        self.assertTrue(not interfaces.IAttribution(self.root['item']).isAttributed('cat11'))
+        self.assertTrue(len(self.contributor_items.values()) == 0)
+
+    def test_EditorialReviewItem(self):
+        from quotationtool.categorization.browser import attribution
+        classifySubscriber(self.root['item'], None)
+        cntr = self.contributor_items.pop()
+        cntr.finish('finish', u"Done")
+        request = TestRequest(form={
+                'attribution.widgets.set1': u'cat13',
+                'attribution.widgets.set2': u'cat23',
+                'attribution.widgets.set3': u'cat33',
+                'form.widgets.workflow-message': u'OK',
+                'form.buttons.finish': u"Finish"})
+        pagelet = attribution.EditorialReviewForm(
+            self.editor_items.pop(), request)
+        pagelet.update()
+        self.assertTrue(pagelet.message() == u"Done")
+        self.assertTrue(interfaces.IAttribution(self.root['item']).isAttributed('cat13'))
+        self.assertTrue(interfaces.IAttribution(self.root['item']).isAttributed('cat23'))
+        self.assertTrue(interfaces.IAttribution(self.root['item']).isAttributed('cat33'))
+        self.assertTrue(not interfaces.IAttribution(self.root['item']).isAttributed('cat11'))
+        self.assertTrue(len(self.editor_items.values()) == 0)
+
 
 
 def test_suite():

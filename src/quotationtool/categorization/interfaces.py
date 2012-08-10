@@ -354,6 +354,9 @@ class IClassificationWorkItem(zope.interface.Interface):
     process's context."""
 
 
+class IReclassificationWorkItem(zope.interface.Interface):
+    """ A workflow item used if the data base item was reclassified."""
+
 
 ### BBB: will be removed
 class IAttributionInjection(zope.interface.Interface):

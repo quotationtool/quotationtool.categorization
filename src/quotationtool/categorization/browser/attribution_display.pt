@@ -1,40 +1,17 @@
 <div i18n:domain="quotationtool" id="attribution">
   <metal:block use-macro="macro:subform-display">
 
-    <metal:block fill-slot="label">
-      <h1 tal:condition="view/label|nothing"
-	  tal:content="view/label">
-        Categorization
-      </h1>
-    </metal:block>
- 
-    <div metal:fill-slot="extra-info">
-      <!--div class="content-item-details" 
-	  tal:content="structure context/@@details|nothing">
-	Author: Title...
-      </div-->
-      <metal:block use-macro="macro:attribution-desc"/>
-      <p>
-	<a href="@@doAttribution.html" class="button-like"
-	   i18n:translate="edit-attribution-link">
-	  Edit Categorization
-	</a>
-      </p>
+    <div metal:fill-slot="extra-info" class="reclassify-link">
+	<a href="@@reclassify.html#tabs" class="link-with-icon internal reclassify"
+	   tal:attributes="href string:${context/@@absolute_url}/@@reclassify.html#tabs"
+	   i18n:translate="edit-attribution-link"
+	   >Reclassify</a>
     </div>
 
     <metal:block fill-slot="main">
       <div id="attribution-rows">
 	<metal:block use-macro="macro:attribution-rows"/>
       </div>
-    </metal:block>
-
-    <metal:block fill-slot="bottom">
-      <p>
-	<a href="@@doAttribution.html" class="button-like"
-	   i18n:translate="edit-attribution-link">
-	  Edit Categorization
-	</a>
-      </p>
     </metal:block>
 
   </metal:block>

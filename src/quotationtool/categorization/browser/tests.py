@@ -169,12 +169,13 @@ class AttributionTests(placelesssetup.PlacelessSetup, unittest.TestCase):
         pagelet = attribution.ContributorBranchForm(
             self.contributor_items.pop(), request)
         pagelet.update()
-        self.assertTrue(interfaces.IAttribution(self.root['item']).isAttributed('cat13'))
-        self.assertTrue(interfaces.IAttribution(self.root['item']).isAttributed('cat23'))
-        self.assertTrue(interfaces.IAttribution(self.root['item']).isAttributed('cat33'))
-        self.assertTrue(not interfaces.IAttribution(self.root['item']).isAttributed('cat11'))
+        # not saved on database item
+        self.assertTrue(not interfaces.IAttribution(self.root['item']).isAttributed('cat13'))
         self.assertTrue(len(self.contributor_items.values()) == 0)
-
+        # but on on workitem
+        next = self.editor_items.pop()
+        self.assertTrue(next.object_.isAttributed('cat13'))
+        
     def test_EditorialReviewItem(self):
         from quotationtool.categorization.browser import attribution
         classifySubscriber(self.root['item'], None)
@@ -189,7 +190,8 @@ class AttributionTests(placelesssetup.PlacelessSetup, unittest.TestCase):
         pagelet = attribution.EditorialReviewForm(
             self.editor_items.pop(), request)
         pagelet.update()
-        self.assertTrue(pagelet.message() == u"Done")
+        self.assertTrue(pagelet.message() == u"OK")
+        # now saved on database item
         self.assertTrue(interfaces.IAttribution(self.root['item']).isAttributed('cat13'))
         self.assertTrue(interfaces.IAttribution(self.root['item']).isAttributed('cat23'))
         self.assertTrue(interfaces.IAttribution(self.root['item']).isAttributed('cat33'))

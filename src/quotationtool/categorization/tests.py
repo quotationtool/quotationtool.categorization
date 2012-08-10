@@ -364,9 +364,85 @@ class RelatedAttributionTests(PlacelessSetup, unittest.TestCase):
     def tearDown(self):
         tearDown(self)
 
+class ReclassificationTests(placelesssetup.PlacelessSetup, unittest.TestCase):
+
+    def setUp(self):
+        super(ReclassificationTests, self).setUp()
+        self.root = placefulSetUp(True)
+        setUpZCML(self)
+        hooks.setSite(self.root)
+        testing.setUpIntIds(self)
+        testing.generateCategorizableItemDescriptions(self.root)
+        testing.generateCategoriesContainer(self.root)
+        testing.setUpAttributionIndex(self)
+        testing.setUpRelatedAttributionIndex(self)
+        testing.setUpRelationCatalog(self)
+        from quotationtool.workflow import testing as workflowtesting
+        workflowtesting.setUpWorkLists(self.root)
+        workflowtesting.setUpIndices(self)
+        from quotationtool.workflow.interfaces import IWorkList
+        self.editor_items = zope.component.getUtility(IWorkList, name='editor', context=self.root)
+        self.contributor_items = zope.component.getUtility(IWorkList, name='contributor', context=self.root)
+        self.item = self.root['item'] = testing.Categorizable()
+        attr = interfaces.IAttribution(self.item)
+        attr.set(('cat12', 'cat22', 'cat32'))
+
+    def startWorkflow(self):
+        from zope.wfmc.interfaces import IProcessDefinition
+        pd = zope.component.getUtility(IProcessDefinition, name='quotationtool.reclassify')
+        from quotationtool.categorization.reclassify import ReclassificationContext
+        context = ReclassificationContext(self.item)
+        from quotationtool.categorization.attribution import PersistentAttribution
+        import datetime
+        self.work_attr = PersistentAttribution()
+        self.work_attr.set(interfaces.IAttribution(self.item).get())
+        pd(context).start('bob', datetime.datetime.now(), u"Hello World", None, self.work_attr)
+
+    def test_PostponeAndAccept(self):
+        self.startWorkflow()
+        self.assertTrue(len(self.editor_items) == 1)
+        task = self.editor_items.pop()
+        task.finish('postpone', u"Not yet done")
+        self.assertTrue(len(self.editor_items) == 1)
+        self.assertTrue(self.editor_items.pop() != task)
+        task = self.editor_items.pop()
+        task.object_.unattribute('cat22')
+        task.object_.attribute('cat21')
+        from zope.wfmc.interfaces import ProcessError
+        task.finish('accept', u"Done")
+        self.assertTrue(len(self.editor_items) == 0)
+        self.assertTrue('cat22' not in interfaces.IAttribution(self.item).get())
+        self.assertTrue('cat12' in interfaces.IAttribution(self.item).get())
+        self.assertTrue('cat21' in interfaces.IAttribution(self.item).get())
+        self.assertTrue('cat32' in interfaces.IAttribution(self.item).get())
+
+    def test_Reject(self):
+        self.startWorkflow()
+        task = self.editor_items.pop()
+        task.object_.unattribute('cat22')
+        task.object_.attribute('cat21')
+        task.finish('reject', u"Done")
+        self.assertTrue(len(self.editor_items) == 0)
+        self.assertTrue('cat21' not in interfaces.IAttribution(self.item).get())
+        self.assertTrue('cat12' in interfaces.IAttribution(self.item).get())
+        self.assertTrue('cat22' in interfaces.IAttribution(self.item).get())
+        self.assertTrue('cat32' in interfaces.IAttribution(self.item).get())
+
+    def OFFtest_IfIndexed(self):
+        from zope.intid.interfaces import IIntIds
+        intids = zope.component.getUtility(IIntIds, context=self.root)
+        iid = intids.register(self.item)
+        self.startWorkflow()
+        from z3c.indexer.query import AnyOf
+        from z3c.indexer.search import SearchQuery
+        query = SearchQuery(AnyOf('workflow-relevant-oids', iid))
+        res = query.apply()
+        self.assertTrue(len(res) == 1)
+  
 
 def test_suite():
     return unittest.TestSuite((
+            unittest.makeSuite(ReclassificationTests),
             doctest.DocTestSuite('quotationtool.categorization.field',
                                  setUp = setUpFieldConfig,
                                  tearDown = tearDownFieldConfig,

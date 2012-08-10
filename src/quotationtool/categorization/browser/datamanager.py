@@ -81,7 +81,7 @@ class NonExclusiveAttributionDataManager(object):
         vocabulary = self.field.value_type.vocabulary
         rc = []
         for term in vocabulary:
-            if term.token in attribution:
+            if term.value.__name__ in attribution:
                 rc.append(term.value)
         return rc
 
@@ -102,13 +102,21 @@ class NonExclusiveAttributionDataManager(object):
                                self.context.__class__.__module__,
                                self.context.__class__.__name__))
         attribution = interfaces.IAttribution(self.context)
-        cats = attribution.attribution_factory(self.category_set.values())
-        for cat in cats:
-            if cat.__name__ in value:
-                attribution.attribute(cat.__name__)
+        vocabulary = self.field.value_type.vocabulary
+        for term in vocabulary:
+            if term.token in value:
+                attribution.attribute(term.value.__name__)
             else:
-                if attribution.isAttributed(cat.__name__):
-                    attribution.unattribute(cat.__name__)
+                if attribution.isAttributed(term.value.__name__):
+                    attribution.unattribute(term.value.__name__)
+
+        #cats = attribution.attribution_factory(self.category_set.values())
+        #for cat in cats:
+        #    if cat.__name__ in value:
+        #        attribution.attribute(cat.__name__)
+        #    else:
+        #        if attribution.isAttributed(cat.__name__):
+        #            attribution.unattribute(cat.__name__)
                 
     def canAccess(self):
         return True # TODO

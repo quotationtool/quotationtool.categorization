@@ -1,0 +1,9 @@
+<div class="itemaction reclassify-action" i18n:domain="quotationtool">
+  <a class="internal itemaction" href="@@reclassify.html#tabs"
+     tal:attributes="href string:${context/@@absolute_url}/@@reclassify.html#tabs"
+     title="Reclassify" i18n:attributes="title reclassify-action"
+     ><img src="/@@/quotationtool.images/attribution.png"
+     tal:attributes="src string:${request/URL/0}/@@/quotationtool.images/attribution.png"
+     alt="Reclassify" i18n:attributes="alt reclassify-action"/>
+  </a>
+</div>

@@ -69,15 +69,15 @@
       viewName="@@attribution.html"
       weight="310"
       />
-  <!--zope:adapter
+  <zope:adapter
       for="..interfaces.ICategorizable
 	   zope.publisher.interfaces.browser.IBrowserRequest
-	   .attribution.AttributionForm
+	   .attribution.ReclassificationForm
 	   quotationtool.skin.interfaces.IItemTabs
 	   .tabs.IAttributionTab"
       provides="z3c.menu.ready2go.interfaces.ISelectedChecker"
       factory="z3c.menu.ready2go.checker.TrueSelectedChecker"
-      /-->
+      />
   <zope:adapter
       for="..interfaces.ICategorizable
 	   zope.publisher.interfaces.browser.IBrowserRequest

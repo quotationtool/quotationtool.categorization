@@ -1,0 +1,18 @@
+<div
+    class="attribution-form"
+    i18n:domain="quotationtool"
+    metal:use-macro="macro:form">
+
+  <metal:block fill-slot="extra-info">
+    <metal:macro use-macro="macro:form-info"/>
+  </metal:block>
+  
+  <metal:slot fill-slot="main">
+ 
+    <metal:macro use-macro="macro:attribution-subform"/>
+
+    <metal:macro use-macro="macro:widget-rows"/>
+
+  </metal:slot>
+ 
+</div>

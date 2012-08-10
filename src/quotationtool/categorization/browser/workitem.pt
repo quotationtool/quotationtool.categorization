@@ -18,7 +18,8 @@
 
   <metal:slot fill-slot="main">
  
-   <fieldset class="attribution-subform">
+   <fieldset class="attribution-subform"
+       metal:define-macro="attribution-subform">
       <legend 
 	  i18n:translate=""
 	  title="Please select category labels"

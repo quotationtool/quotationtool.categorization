@@ -8,14 +8,21 @@ from zope.traversing.browser import absoluteURL
 from zope.proxy import removeAllProxies
 from zope.i18n import translate
 from zope.publisher.browser import BrowserView
+from zope.security.management import getInteraction
+from zope.wfmc.interfaces import IProcessDefinition
+from zope.viewlet.viewlet import ViewletBase
+from zope.app.pagetemplate.viewpagetemplatefile import ViewPageTemplateFile
+import datetime
 
 from quotationtool.skin.interfaces import ITabbedContentLayout
-from quotationtool.workflow.interfaces import IWorkItemForm
+from quotationtool.workflow.interfaces import IWorkItemForm, IWorkflowHistory
 from quotationtool.workflow.browser import common
 from quotationtool.workflow.history import UserNotation
 
 from quotationtool.categorization import interfaces
 from quotationtool.categorization.interfaces import _
+from quotationtool.categorization.reclassify import ReclassificationContext
+from quotationtool.categorization.attribution import PersistentAttribution
 
 
 class AttributionFieldsMixin(object):
@@ -79,7 +86,8 @@ class AttributionSubForm(AttributionFieldsMixin, subform.EditSubForm):
         for catset in data.values():
             for cat in catset:
                 categories.append(cat.__name__)
-        self.context.object_.set(categories)
+        attr = interfaces.IAttribution(self.getContent())
+        attr.set(categories)
 
 
 comment = zope.schema.Text(
@@ -105,7 +113,6 @@ class WorkItemBaseForm(AttributionFieldsMixin, form.Form):
     
     def update(self):
         super(WorkItemBaseForm, self).update()
-        #self.widgets['workflow-message'].ignoreContext = True
         self.updateAttributionSubForm()
 
     def updateAttributionSubForm(self):
@@ -150,7 +157,7 @@ class EditorBranchForm(WorkItemBaseForm):
              u"The database item below has been created recently and has not yet been categorized. Please select category labels from the form below.") 
 
     @button.buttonAndHandler(_(u"Finish (Save to item)"), name="finish")
-    def handleApply(self, action):
+    def handleFinish(self, action):
         self._handle('finish')
 
     @button.buttonAndHandler(_(u"Postpone (Save as draft)"), name="postpone")
@@ -176,7 +183,7 @@ class ContributorBranchForm(WorkItemBaseForm):
     info = EditorBranchForm.info
 
     @button.buttonAndHandler(_(u"Finish"), name="finish")
-    def handleApply(self, action):
+    def handleFinish(self, action):
         self._handle('finish')
 
     @button.buttonAndHandler(_(u"Postpone (Save as draft)"), name="postpone")
@@ -192,7 +199,7 @@ class CategorizationProcessName(BrowserView):
     """ A nice process name for the worklist."""
 
     def __call__(self):
-        return _(u"Categorization")
+        return _(u"Classification")
 
 
 class ObjectLabel(BrowserView):
@@ -209,3 +216,138 @@ class ObjectLabel(BrowserView):
             return translate(label(), context=self.request)
         except Exception:
             return label()
+
+
+class ReAttributionSubForm(AttributionSubForm):
+    """ A subform for the ReclassificationForm """
+
+    def getContent(self):
+        return self.context            
+
+    def getCategorizableItem(self):
+        return self.context
+
+
+class ReclassificationForm(form.Form):
+    """ A reclassification form. Depending on permissions the form
+    starts a reclassification workflow (for normal
+    quotationtool.Members) or writes the new selections to the context
+    item (for quotationtool.Editors)."""
+
+    zope.interface.implements(ITabbedContentLayout)
+
+    fields = field.Fields(comment)
+
+    label = _(u"Reclassify")
+
+    info = _('reclassification-info',
+             u"Please select category labels from the form below. Your selections will soon be reviewed by the editors of this website and then show up in the database.")
+
+    info_for_editors = _('reclassification-info-for-editors',
+                         u"Please select category labels from the form below.")
+    
+    ignoreContext = True
+    ignoreReadOnly = True
+    
+    process_started = False
+
+    def checkPermission(self):
+        interaction = getInteraction()
+        return interaction.checkPermission('quotationtool.workflow.DoEditorialReview', self.context)
+
+    def update(self):
+        super(ReclassificationForm, self).update()
+        self.updateAttributionSubForm()
+        if self.checkPermission():
+            self.info = self.info_for_editors
+
+    def updateAttributionSubForm(self):
+        self.attribution = ReAttributionSubForm(self.context, self.request, self)
+        self.attribution.update()
+
+    @button.buttonAndHandler(_(u"Apply"), name='reclassify')
+    def handleReclassify(self, action):
+        self.updateAttributionSubForm()
+        data, errors = self.extractData()
+        if errors:
+            self.status = self.formErrorsMessage
+            return
+        history = IWorkflowHistory(self.context)
+        principal = getattr(self.request, 'principal', None)
+        if self.checkPermission():
+            # store input data to context (attribution.getContent() returns it)
+            self.attribution.storeToWorkItem()
+        else:
+            # store input data to persistent attribution
+            pattr = PersistentAttribution()
+            attr_data, attr_errors = self.attribution.extractData()
+            categories = []
+            for catset in attr_data.values():
+                for cat in catset:
+                    categories.append(cat.__name__)
+            pattr.set(categories)
+            # start workflow process
+            self.process_started = True
+            pd = zope.component.getUtility(
+                IProcessDefinition, name='quotationtool.reclassify')
+            context = ReclassificationContext(removeAllProxies(self.context))
+            proc = pd(context)
+            proc.start(getattr(principal, 'id', u"Unknown"), 
+                       datetime.datetime.now(),
+                       data['workflow-message'],
+                       removeAllProxies(history),
+                       removeAllProxies(pattr))
+        # write history
+        history.append(UserNotation(
+                getattr(principal, 'id', u"Unknown"),
+                data['workflow-message']))
+        # redirect to next url
+        self.request.response.redirect(self.nextURL())
+
+    @button.buttonAndHandler(_(u"Cancel"), name="cancel")
+    def handleCancel(self, action):
+        self.request.response.redirect(self.nextURL())
+
+    def nextURL(self):
+        return absoluteURL(self.context, self.request) + u"/@@attribution.html"
+
+
+class ReclassificationEditorialReview(WorkItemBaseForm):
+    """ The base class works for the items of the
+    quotationtool.classify workflow, too."""
+
+    label = EditorBranchForm.label
+
+    info = _('reclassification-review-info', 
+             u"The database item below has recently been reclassified. The selections of category labels from the form below need to be reviewed before the show up in the database.")
+
+    @button.buttonAndHandler(_(u"Accept (Save to item)"), name="accept")
+    def handleAccept(self, action):
+        self._handle('accept')
+
+    @button.buttonAndHandler(_(u"Reject (Keep old selections)"), name="reject")
+    def handleReject(self, action):
+        self._handle('reject')
+
+    @button.buttonAndHandler(_(u"Postpone (Save as draft)"), name="postpone")
+    def handlePostpone(self, action):
+        self._handle('postpone')
+
+    @button.buttonAndHandler(_(u"Cancel"), name="cancel")
+    def handleCancel(self, action):
+        self.request.response.redirect(self.nextURL())
+
+
+class ReclassificationProcessName(BrowserView):
+    """ A nice process name for the worklist."""
+
+    def __call__(self):
+        return _(u"Re-Classification")
+
+
+class ReclassifyItemAction(ViewletBase):
+
+    template = ViewPageTemplateFile('reclassify_action.pt')
+
+    def render(self):
+        return self.template()

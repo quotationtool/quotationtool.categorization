@@ -1,6 +1,9 @@
 Workflow
 ========
 
+Note: The reclassify-workflow is defined in reclassify.* and tested in
+tests.py. It is not documented here.
+
 So let's have a look how things work. First we need to set up the
 worklist for editorial review.
 

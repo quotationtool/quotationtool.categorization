@@ -32,6 +32,8 @@ def setUpDataManager(test):
     setUpZCML(test)
     hooks.setSite(root)
     testing.generateCategorizableItemDescriptions(root)
+    from zope.security.management import newInteraction
+    interaction = newInteraction()
 
 def tearDownPlaces(test):
     placefulTearDown()
@@ -57,6 +59,9 @@ class AttributionTests(placelesssetup.PlacelessSetup, unittest.TestCase):
         self.root = placefulSetUp(True)
         setUpZCML(self)
         hooks.setSite(self.root)
+        # we need a transaction
+        from zope.security.management import newInteraction
+        interaction = newInteraction()
         testing.generateCategorizableItemDescriptions(self.root)
         testing.generateCategoriesContainer(self.root)
         testing.setUpIntIds(self)
@@ -76,9 +81,6 @@ class AttributionTests(placelesssetup.PlacelessSetup, unittest.TestCase):
         from zope.intid.interfaces import IIntIds
         self.intids = zope.component.getUtility(IIntIds, context=self.root)
         self.intids.register(self.root['item'])
-        # we need a transaction
-        from zope.security.management import newInteraction
-        interaction = newInteraction()
         
     def tearDown(self):
         super(AttributionTests, self).tearDown()

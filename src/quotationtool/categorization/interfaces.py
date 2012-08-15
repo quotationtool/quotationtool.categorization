@@ -100,35 +100,35 @@ def checkCategoryName(name):
     if isinstance(name, str):
         name = unicode(name)
     elif not isinstance(name, unicode):
-        raise TypeError("Invalid name type", type(name))
+        raise TypeError("Invalid ID type", type(name))
     #taken from namechooser
     if not name:
         raise ValueError(
-            _("An empty name was provided. Names cannot be empty.")
+            _("An empty ID was provided. IDs cannot be empty.")
             )
     #taken from namechooser
     if name[:1] in '+@' or '/' in name:
         raise ValueError(
-            _("Names cannot begin with '+' or '@' or contain '/'")
+            _(u"IDs cannot begin with '+' or '@' or contain '/'")
             )
     #check if already in use
     container = zope.component.getUtility(
         ICategoriesContainer, context=getSite())
     if container.getCategory(name):
         raise KeyError(
-            _("The given name is already being used")
+            _("The given ID is already being used")
             )
     return True
 
 
 class ICategory(IContained, IWeightedItem):
-    """A category."""
+    """A category label."""
 
     containers('.ICategorySet')
 
     __name__ = zope.schema.TextLine(
         title=_('icategory-name-title', u"ID"),
-        description=_('icategory-name-desc', u"Unique identifier of the category, where 'unique' means unique within the setunion of all category sets."),
+        description=_('icategory-name-desc', u"Unique identifier of the category label. 'Unique' means unique within the setunion of all category sets."),
         required=True,
         default=None,
         constraint=checkCategoryName,
@@ -136,7 +136,7 @@ class ICategory(IContained, IWeightedItem):
 
     title = zope.schema.TextLine(
         title = _('icategory-title-title',
-                  u"Title"),
+                  u"Title/Label"),
         description = _('icategory-title-desc',
                         u"How should the category be named?"),
         required = True,
@@ -162,7 +162,7 @@ class ICategorySet(IWeightedItemsContainer, IWeightedItem):
         title = _('icategoryset-title-title',
                   u"Title"),
         description = _('icategoryset-title-desc',
-                        u"How should the set of categories be named?"),
+                        u"How should the set of category labels be named?"),
         required = True,
         )
 
@@ -178,7 +178,7 @@ class ICategorySet(IWeightedItemsContainer, IWeightedItem):
         title = _('icategoryset-usedfor-title',
                   u"Used for"),
         description = _('icategoryset-usedfor-title',
-                        u"To which types of items is this set of categories applicable?"),
+                        u"To which types of items should this set of category labels be applicable?"),
         default = [],
         value_type = zope.schema.Choice(
         title = _('icategoryset-usedfor-choice-title',
@@ -191,26 +191,17 @@ class ICategorySet(IWeightedItemsContainer, IWeightedItem):
         title = _('icategoryset-mode-title',
                   u"Mode"),
         description = _('icategoryset-mode-desc',
-                        u"Choose if the categories of this set are mutually exclusive or non-exclusive. This field has exclusive options--ether `exclusive' or `non-exclusive'--while the options of ``Used For'' are non-exclusive."),
+                        u"Choose if the category labels of this set are mutually exclusive or non-exclusive. Example: This field has exclusive options--either `exclusive' or `non-exclusive'--while the options of ``Used For'' are non-exclusive."),
         vocabulary = 'quotationtool.categorization.mode',
         required = True,
         default = 'non-exclusive',
-        )
-
-    inherit = zope.schema.Bool(
-        title = _('icategoryset-inherit-title',
-                  u"Inherit"),
-        description = _('icategoryset-inherit-desc',
-                        u"Inherit categorization from related item."),
-        required = False,
-        default = False,
         )
 
     relation_indices = zope.schema.List(
         title = _('icategoryset-relationindices-title',
                   u"Relation Indices"),
         description = _('icategoryset-relationindices-desc',
-                        u""),
+                        u"Choose a relation type to inherit categorization from."),
         value_type = zope.schema.Choice(
         title = _('icategoryset-relationindex-title',
                   u"Index"),
@@ -225,7 +216,7 @@ class ICategorySet(IWeightedItemsContainer, IWeightedItem):
         title = _('icategoryset-opentousers-title',
                   u"Open"),
         description = _('icategoryset-opentousers-desc',
-                        u"If checked other users will be allowed to add categories to this set."),
+                        u"All authenticated users (not only members of the editorial board) are allowed to add category labels to this set."),
         required = False,
         default = True,
         )
@@ -234,7 +225,17 @@ class ICategorySet(IWeightedItemsContainer, IWeightedItem):
         title = _('icategoryset-complete-title',
                   u"Complete"),
         description = _('icategoryset-complete-desc',
-                        u"If checked it is impossible to add new categories to this set."),
+                        u"Should it be impossible to add new category labels to this set."),
+        required = False,
+        default = False,
+        )
+
+    #BBB
+    inherit = zope.schema.Bool(
+        title = _('icategoryset-inherit-title',
+                  u"Inherit"),
+        description = _('icategoryset-inherit-desc',
+                        u"Inherit categorization from related item."),
         required = False,
         default = False,
         )

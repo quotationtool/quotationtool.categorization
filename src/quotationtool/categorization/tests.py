@@ -10,6 +10,7 @@ from zope.site.folder import rootFolder
 import zope.event
 from zope.lifecycleevent import ObjectModifiedEvent
 from zope.app.component import hooks
+from zope.security.management import newInteraction
 
 import quotationtool.categorization
 from quotationtool.categorization import testing
@@ -33,11 +34,25 @@ def setUpFieldConfig(test):
     root = test.globs['root']
     setUpZCML(test)
     hooks.setSite(root)
+    interaction = newInteraction()
     testing.generateCategorizableItemDescriptions(root)
 
 
 
 def tearDownFieldConfig(test):
+    placefulTearDown()
+    tearDown(test)
+    from zope.schema.vocabulary import _clear
+    _clear()
+
+
+def setUpCategorySet(test):
+    test.globs = {'root': placefulSetUp(True)} # placeful setup
+    root = test.globs['root']
+    setUpZCML(test)
+    hooks.setSite(root)
+
+def tearDownCategorySet(test):
     placefulTearDown()
     tearDown(test)
     from zope.schema.vocabulary import _clear
@@ -96,6 +111,7 @@ def setUpRelatedAttribution(test):
     test.globs['root'] = root = rootFolder()
     setUpAttributionIndex(test)
     setUpIntIds(test)
+    interaction = newInteraction()
 
 
 def tearDownRelatedAttribution(test):
@@ -162,6 +178,7 @@ class CategoriesContainerTests(PlacelessSetup, unittest.TestCase):
         super(CategoriesContainerTests, self).setUp()
         setUpZCML(self)
         self.root = rootFolder()
+        interaction = newInteraction() # needed for generation of categories
         testing.generateCategorizableItemDescriptions(self.root)
         testing.generateCategoriesContainer(self.root)
         setUpAttributionIndex(self)
@@ -207,6 +224,7 @@ class AttributionTests(PlacelessSetup, unittest.TestCase):
         setUpZCML(self)
         self.root = rootFolder()
         setUpIntIds(self)
+        interaction = newInteraction() # needed for generation of categories
         testing.generateCategorizableItemDescriptions(self.root)
         testing.generateCategoriesContainer(self.root)
         setUpAttributionIndex(self)
@@ -334,6 +352,7 @@ class CategorizableItemDescriptionTests(placelesssetup.PlacelessSetup, unittest.
         super(CategorizableItemDescriptionTests, self).setUp()
         self.root = placefulSetUp(True)
         setUpZCML(self)
+        interaction = newInteraction() # needed for generation of categories
 
     def tearDown(self):
         placefulTearDown()
@@ -353,6 +372,7 @@ class RelatedAttributionTests(PlacelessSetup, unittest.TestCase):
         setUpZCML(self)
         self.root = rootFolder()
         setUpIntIds(self)
+        interaction = newInteraction() # needed for generation of categories
         testing.generateCategorizableItemDescriptions(self.root)
         testing.generateCategoriesContainer(self.root)
         setUpAttributionIndex(self)
@@ -372,6 +392,7 @@ class ReclassificationTests(placelesssetup.PlacelessSetup, unittest.TestCase):
         setUpZCML(self)
         hooks.setSite(self.root)
         testing.setUpIntIds(self)
+        interaction = newInteraction() # needed for generation of categories
         testing.generateCategorizableItemDescriptions(self.root)
         testing.generateCategoriesContainer(self.root)
         testing.setUpAttributionIndex(self)
@@ -443,6 +464,11 @@ class ReclassificationTests(placelesssetup.PlacelessSetup, unittest.TestCase):
 def test_suite():
     return unittest.TestSuite((
             unittest.makeSuite(ReclassificationTests),
+            doctest.DocTestSuite('quotationtool.categorization.categoryset',
+                                 setUp = setUpCategorySet,
+                                 tearDown = tearDown,
+                                 optionflags=doctest.NORMALIZE_WHITESPACE|doctest.ELLIPSIS,
+                                 ),
             doctest.DocTestSuite('quotationtool.categorization.field',
                                  setUp = setUpFieldConfig,
                                  tearDown = tearDownFieldConfig,

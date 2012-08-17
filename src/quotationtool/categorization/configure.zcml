@@ -134,19 +134,28 @@
 	interface="zope.container.interfaces.IWriteContainer"
 	/>
     <allow
-	attributes="weight title description categorizable_items 
-		    mode inherit open_to_users complete"
+	interface="zope.location.interfaces.IContained"
 	/>
     <require
 	permission="quotationtool.categorization.AddCategory"
-	set_attributes="weight title description categorizable_items 
-			mode inherit open_to_users complete"
+	set_schema="zope.location.interfaces.IContained"
+	/>
+    <allow
+	attributes="title description categorizable_items mode
+		    relation_indices open_to_users complete
+		    weight items_weight_attribute"
+	/>
+    <require
+	permission="quotationtool.categorization.AddCategory"
+	set_attributes="title description categorizable_items mode
+			relation_indices open_to_users complete
+			weight"
 	/>
     <require
 	permission="quotationtool.categorization.AddCategory"
 	attributes="__update_order__"
 	/>
-    <require
+    <!--BBB: require
 	permission="quotationtool.categorization.DoAttribution"
 	interface=".interfaces.IAttributionInjection"
 	/>
@@ -155,7 +164,7 @@
 	/>
     <allow
 	interface=".interfaces.IAttributionTreeSet"
-	/>
+	/-->
   </class>
 
   <utility
@@ -184,7 +193,14 @@
 	permission="quotationtool.categorization.AddCategory"
 	set_schema=".interfaces.ICategory"
 	/>
+    <allow
+	interface=".interfaces.IWeightedItem"
+	/>
     <require
+	permission="quotationtool.categorization.AddCategory"
+	set_schema=".interfaces.IWeightedItem"
+	/>
+    <!--require
 	permission="quotationtool.categorization.DoAttribution"
 	interface=".interfaces.IAttributionInjection"
 	/>
@@ -193,7 +209,7 @@
 	/>
     <allow
 	interface=".interfaces.IAttributionTreeSet"
-	/>
+	/-->
   </class>
 
   

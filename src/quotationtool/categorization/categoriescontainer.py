@@ -28,7 +28,7 @@ class CategoriesContainer(WeightedItemsContainer):
     def getCategory(self, name, default=None):
         return self.__categories.get(name, default)
 
-    def setCategory(self, name, category):
+    def addCategory(self, name, category):
         self.__categories[name] = category
 
     def removeCategory(self, name):
@@ -37,19 +37,19 @@ class CategoriesContainer(WeightedItemsContainer):
 
 @zope.component.adapter(interfaces.ICategory, IObjectAddedEvent)
 def addCategorySubscriber(category, event):
-    """ Helps to keep CategoriesContainer.categories up to date.
+    """ Helps to keep CategoriesContainer.__categories up to date.
 
     Note that a category is written to the container no matter where
     the category is added, whether it is a category set or some other
     container."""
     container = zope.component.getUtility(
         interfaces.ICategoriesContainer, context=category)
-    container.setCategory(category.__name__, category)
+    container.addCategory(category.__name__, category)
 
 
 @zope.component.adapter(interfaces.ICategory, IObjectRemovedEvent)
 def removeCategorySubscriber(category, event):
-    """ Helps to keep CategoriesContainer.categories up to date."""
+    """ Helps to keep CategoriesContainer.__categories up to date."""
     container = zope.component.getUtility(
         interfaces.ICategoriesContainer, context=category)
     container.removeCategory(category.__name__)
@@ -63,7 +63,7 @@ def moveCategorySubscriber(category, event):
         container = zope.component.getUtility(
             interfaces.ICategoriesContainer, context=category)
         container.removeCategory(event.oldName)
-        container.setCategory(event.newName, category)
+        container.addCategory(event.newName, category)
 
 
 @zope.component.adapter(INewQuotationtoolSiteEvent)

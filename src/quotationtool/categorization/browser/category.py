@@ -1,29 +1,32 @@
 import zope.component
 from z3c.formui import form
-from z3c.form import field
-from z3c.form.form import DisplayForm
+from z3c.form import field, validator
+from z3c.form.form import DisplayForm as DisplayFormView
 from zope.traversing.browser import absoluteURL
 from zope.i18nmessageid import MessageFactory
 from zope.publisher.browser import BrowserView
-from zope.app.pagetemplate.viewpagetemplatefile import ViewPageTemplateFile
 from zope.securitypolicy.interfaces import IPrincipalRoleManager
 from z3c.pagelet.browser import BrowserPagelet
 
+from quotationtool.skin.interfaces import ITabbedContentLayout
+from quotationtool.skin.interfaces import IQuotationtoolBrowserLayer
+
 from quotationtool.categorization.category import Category
 from quotationtool.categorization import interfaces
-from quotationtool.skin.interfaces import ITabbedContentLayout
 
 
 _ = MessageFactory('quotationtool')
-contentMsg = MessageFactory('quotationtool.categorization.content')
 
 
-class DetailsView(BrowserView):
+class DetailsView(DisplayFormView):
 
-    template = ViewPageTemplateFile('category_details.pt')
+    fields = field.Fields(interfaces.ICategory).omit(
+        '__parent__') + \
+        field.Fields(interfaces.IWeightedItem)
 
     def __call__(self):
-        return self.template()
+        self.update()
+        return self.render()
 
 
 class LabelView(BrowserView):
@@ -44,13 +47,27 @@ class AddCategory(form.AddForm):
     zope.interface.implements(ITabbedContentLayout)
 
     label = _('category-add-label',
-              u"Add a new Category")
+              u"Add a new Category Label")
+
+    info = _('category-add-info',
+             u"Note: If you don't provide an ID, the title will be used as ID.")
 
     fields = field.Fields(interfaces.ICategory).omit(
-        '__name__', '__parent__','items_weight_attribute')
-    
+        '__parent__') + \
+        field.Fields(interfaces.IWeightedItem)
+
+    def update(self):
+        super(AddCategory, self).update()
+        self.widgets['__name__'].required = False
+
     def create(self, data):
+        if data['__name__']:
+            self.category_name = data['__name__']
+        else:
+            self.category_name = data['title']
+        #interfaces.checkCategoryName(self.category_name, context=self.context)
         category = Category()
+        del data['__name__']
         form.applyChanges(self, category, data)
 
         # Grant the current user the Edit permission by assigning him
@@ -64,15 +81,30 @@ class AddCategory(form.AddForm):
         return category
 
     def add(self, category):
-        name = category.title
-        if name in self.context:
-           raise UserError(_('addcategory-duplication-error',
-                             u"Category named ${title} already exists.",
-                             mapping = {'title': name}))
-        self.context[name] = category
+        self.context[self.category_name] = category
 
     def nextURL(self):
         return absoluteURL(self.context, self.request)
+
+    @property
+    def action(self):
+        """See interfaces.IInputForm"""
+        return self.request.getURL() + u"#tabs"
+
+
+class CategoryNameValidator(validator.SimpleFieldValidator):
+    
+    def validate(self, value):
+        if value == self.field.missing_value:
+            value = self.view.widgets['title'].extract()
+        return interfaces.checkCategoryName(value, context=self.context)
+
+
+validator.WidgetValidatorDiscriminators(
+    CategoryNameValidator,
+    field=interfaces.ICategory['__name__'],
+    request=IQuotationtoolBrowserLayer,
+    )
 
 
 class EditCategory(form.EditForm):
@@ -84,8 +116,12 @@ class EditCategory(form.EditForm):
     label = _('category-edit-label',
               u"Edit Category")
 
+    info = _('category-edit-info',
+             u"Note: Please use the 'move' action for changing the ID.")
+
     fields = field.Fields(interfaces.ICategory).omit(
-        '__name__', '__parent__','items_weight_attribute')    
+        '__name__', '__parent__') + \
+        field.Fields(interfaces.IWeightedItem)
 
 
 class CategoriesPagelet(BrowserPagelet):

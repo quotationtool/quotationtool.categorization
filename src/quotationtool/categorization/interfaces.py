@@ -95,33 +95,36 @@ class ICategoriesContainer(IWeightedItemsContainer):
         """ Remove the category given by its name from the index.""" 
 
 
-def checkCategoryName(name):
+def checkCategoryName(name, context=getSite()):
+    if '\n' in name or '\r' in name:
+        raise zope.interface.Invalid(
+            _(u"The ID must not contain a newline character (line break)."))
     #taken from namechooser
     if isinstance(name, str):
         name = unicode(name)
     elif not isinstance(name, unicode):
-        raise TypeError("Invalid ID type", type(name))
+        raise zope.interface.Invalid(_(u"Invalid ID type"))
     #taken from namechooser
     if not name:
-        raise ValueError(
-            _("An empty ID was provided. IDs cannot be empty.")
+        raise zope.interface.Invalid(
+            _("An empty ID was provided. IDs must not be empty.")
             )
     #taken from namechooser
     if name[:1] in '+@' or '/' in name:
-        raise ValueError(
-            _(u"IDs cannot begin with '+' or '@' or contain '/'")
+        raise zope.interface.Invalid(
+            _(u"The ID must not begin with '+' or '@' or contain '/'")
             )
-    #check if already in use
+    # check if already in use
     container = zope.component.getUtility(
-        ICategoriesContainer, context=getSite())
+        ICategoriesContainer, context=context)
     if container.getCategory(name):
-        raise KeyError(
+        raise zope.interface.Invalid(
             _("The given ID is already being used")
             )
     return True
 
 
-class ICategory(IContained, IWeightedItem):
+class ICategory(zope.interface.Interface):
     """A category label."""
 
     containers('.ICategorySet')
@@ -129,7 +132,7 @@ class ICategory(IContained, IWeightedItem):
     __name__ = zope.schema.TextLine(
         title=_('icategory-name-title', u"ID"),
         description=_('icategory-name-desc', u"Unique identifier of the category label. 'Unique' means unique within the setunion of all category sets."),
-        required=True,
+        required=False,
         default=None,
         constraint=checkCategoryName,
         )
@@ -151,7 +154,7 @@ class ICategory(IContained, IWeightedItem):
         )
     
 
-class ICategorySet(IWeightedItemsContainer, IWeightedItem):
+class ICategorySet(zope.interface.Interface):#IWeightedItemsContainer, IWeightedItem):
     """A set of related (exclusive/ non-exclusive) categories."""
 
     containers('.ICategoriesContainer')
@@ -191,7 +194,7 @@ class ICategorySet(IWeightedItemsContainer, IWeightedItem):
         title = _('icategoryset-mode-title',
                   u"Mode"),
         description = _('icategoryset-mode-desc',
-                        u"Choose if the category labels of this set are mutually exclusive or non-exclusive. Example: This field has exclusive options--either `exclusive' or `non-exclusive'--while the options of ``Used For'' are non-exclusive."),
+                        u"Choose whether the category labels of this set are mutually exclusive or non-exclusive."),
         vocabulary = 'quotationtool.categorization.mode',
         required = True,
         default = 'non-exclusive',
@@ -216,7 +219,7 @@ class ICategorySet(IWeightedItemsContainer, IWeightedItem):
         title = _('icategoryset-opentousers-title',
                   u"Open"),
         description = _('icategoryset-opentousers-desc',
-                        u"All authenticated users (not only members of the editorial board) are allowed to add category labels to this set."),
+                        u"Should arbitrary users (not only members of the editorial board) be allowed to add category labels to this set?"),
         required = False,
         default = True,
         )
@@ -225,7 +228,7 @@ class ICategorySet(IWeightedItemsContainer, IWeightedItem):
         title = _('icategoryset-complete-title',
                   u"Complete"),
         description = _('icategoryset-complete-desc',
-                        u"Should it be impossible to add new category labels to this set."),
+                        u"Should it be impossible to add new category labels to this set?"),
         required = False,
         default = False,
         )

@@ -1,21 +1,18 @@
 <div i18n:domain="quotationtool" id="categoriescontainer">
 
-  <h1 i18n:translate="categoriescontainer-container-label"
-      >Classification System</h1>
-
   <p i18n:translate="categoriescontainer-desc">
-    The classification system is defined and evolved by the
-    users. They can add categories (classes) and group them together
-    into category sets (classes of classes). <br/><b>category
-    sets</b>: Related categories are bundled into category
-    sets. <br/><b>mode</b>: The categories in each set are ether
-    mutually exclusive or non-exclusive, i.e. ether only one category
-    of a set can be attributed to an item (exclusive) or many can be
+    The classification system is defined and evolved by the users of
+    this website. They can add category labels and group them together
+    into sets of category labels. <br/><b>sets of category labels</b>:
+    Related categories are bundled into category
+    sets. <br/><b>mode</b>: The category labels in each set are either
+    mutually exclusive or non-exclusive, i.e. either only one label of
+    a set can be attributed to an item (exclusive) or many can be
     attributed (non-exclusive). Exclusiveness or non-exclusiveness is
     set in the ``mode'' field of a category set. <br/><b>weight</b>:
     For ordered classification forms (relevance, importance,
-    unlikelihood) both, category sets and categories, have a
-    ``weight'' field. They are ordered by ascending ``weight''.
+    unlikelihood) both, sets of category labels and category labels,
+    have a ``weight'' field. They are ordered by ascending ``weight''.
   </p>
 
   <table class="container-listing">
@@ -23,7 +20,7 @@
       <tr>
 	<td class="categoryset" 
 	    i18n:translate="categoriescontainer-categoryset-column-label">
-	    Category Set
+	    Set of Category Labels
 	</td>
 	<td class="description">
 	  <span tal:content="modules/quotationtool/categorization/interfaces/ICategorySet/description/title">
@@ -32,7 +29,7 @@
 	</td>
 	<td class="categories">
 	  <span i18n:translate="">
-	    Categories
+	    Category Labels
 	  </span>
 	</td>
 	<td class="categorizable_items">
@@ -45,13 +42,13 @@
 	    Mode
 	  </span>
 	</td>
-	<td class="inherit">
+	<!--td class="inherit">
 	  <span tal:content="modules/quotationtool/categorization/interfaces/ICategorySet/inherit/title">
 	    Inherit
 	  </span>
-	</td>
+	</td-->
 	<td class="weight">
-	  <span tal:content="modules/quotationtool/categorization/interfaces/ICategorySet/weight/title">
+	  <span tal:content="modules/quotationtool/categorization/interfaces/IWeightedItem/weight/title">
 	    Weight
 	  </span>
 	</td>
@@ -60,6 +57,7 @@
     <tbody>
       <tal:block repeat="category_set context/values">
       <tr tal:condition="repeat/category_set/odd" class="odd">
+	<metal:macro define-macro="categoryset-row">
 	<td>
 	  <a class="content-item" href=""
 	     tal:content="category_set/title"
@@ -70,7 +68,11 @@
 	  <ul class="categories-vector">
 	    <tal:block 
 		repeat="category python:sorted(category_set.values(), cmp = lambda x,y: cmp(x.weight, y.weight))">
-	    <li tal:content="category/title"/>
+	    <li>
+	      <a class="internal" href="category/"
+		 tal:attributes="href category/@@absolute_url"
+		 tal:content="category/title">category</a>
+	    </li>
 	    </tal:block>
 	  </ul>
 	</td>
@@ -80,32 +82,12 @@
 	  </span>
 	</td>
 	<td tal:content="category_set/mode"/>
-	<td tal:content="category_set/inherit"/>
+	<!--td tal:content="category_set/inherit"/-->
 	<td tal:content="category_set/weight"/>
+	</metal:macro>
       </tr>
       <tr tal:condition="repeat/category_set/even" class="even">
-	<td>
-	  <a class="content-item" href=""
-	     tal:content="category_set/title"
-	     tal:attributes="href category_set/@@absolute_url"/>
-	</td>
-	<td tal:content="category_set/description | nothing"/>
-	<td>
-	  <ul class="categories-vector">
-	    <tal:block 
-		repeat="category python:sorted(category_set.values(), cmp = lambda x,y: cmp(x.weight, y.weight))">
-	    <li tal:content="category/title"/>
-	    </tal:block>
-	  </ul>
-	</td>
-	<td>
-	  <span tal:repeat="item python:view.getItemTitle(category_set.categorizable_items)">
-	    <span tal:content="item"/><span tal:condition="not:repeat/item/end">,<br/></span>
-	  </span>
-	</td>
-	<td tal:content="category_set/mode"/>
-	<td tal:content="category_set/inherit"/>
-	<td tal:content="category_set/weight"/>
+	<metal:macro use-macro="template/macros/categoryset-row"/>
       </tr>
       </tal:block>
     </tbody>
@@ -115,7 +97,7 @@
     <a i18n:translate="add-categoryset"
        href="../addCategorySet.html"
        tal:attributes="href string:${context/@@absolute_url}/@@addCategorySet.html"
-       >Add a new Category Set</a>
+       >Add a new Set of Category Labels</a>
   </div>
 
 

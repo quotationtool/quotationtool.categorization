@@ -41,7 +41,7 @@
     </tr>
     <tr>
       <td class="schema-col"
-	  tal:define="schema modules/quotationtool/categorization/interfaces/ICategorySet/inherit">
+	  tal:define="schema modules/quotationtool/categorization/interfaces/ICategorySet/relation_indices">
 	<metal:block use-macro="template/macros/schema_info"/>
       </td>
       <td tal:content="context/inherit | nothing">...</td>
@@ -62,7 +62,7 @@
     </tr>
     <tr>
       <td class="schema-col"
-	  tal:define="schema modules/quotationtool/categorization/interfaces/ICategorySet/weight">
+	  tal:define="schema modules/quotationtool/categorization/interfaces/IWeightedItem/weight">
 	<metal:block use-macro="template/macros/schema_info"/>
       </td>
       <td tal:content="context/weight | nothing">...</td>

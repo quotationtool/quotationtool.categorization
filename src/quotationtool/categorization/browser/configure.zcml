@@ -148,6 +148,11 @@
       factory=".category.DetailsView"
       permission="zope.View"
       />
+  <z3c:template
+      for=".category.DetailsView"
+      template="category_details.pt"
+      layer="quotationtool.skin.interfaces.IQuotationtoolBrowserLayer"
+      />
   <zope:view
       for="..interfaces.ICategory"
       name="label"
@@ -162,6 +167,9 @@
       class=".category.AddCategory"
       layer="quotationtool.skin.interfaces.IQuotationtoolBrowserLayer"
       permission="quotationtool.categorization.AddCategory"
+      />
+  <zope:adapter
+      factory=".category.CategoryNameValidator"
       />
   
   <z3c:pagelet
@@ -186,8 +194,7 @@
       permission="quotationtool.categorization.EditCategory"
       />
 
-
-
+  <include file="search.zcml"/>
   <include file="nav.zcml"/>
   <include file="tabs.zcml"/>
 

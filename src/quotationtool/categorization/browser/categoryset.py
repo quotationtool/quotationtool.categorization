@@ -17,24 +17,12 @@ from widget import NonExclusiveAttributionFieldWidget, ExclusiveAttributionField
 from quotationtool.skin.interfaces import ITabbedContentLayout
 
 _ = MessageFactory('quotationtool')
-contentMsg = MessageFactory('quotationtool.categorization.content')
 
 
-class DetailsView(BrowserView):
+class DetailsView(DisplayFormView):
 
-    template = ViewPageTemplateFile('categoryset_details.pt')
-
-    def __call__(self):
-        return self.template()
-
-
-class DetailsViewOFF(DisplayFormView):
-
-    label = _('categoryset-details-label',
-              u"Category Set")
-
-    fields = field.Fields(interfaces.ICategorySet).omit(
-        '__name__', '__parent__', 'items_weight_attribute')
+    fields = field.Fields(interfaces.ICategorySet).omit('inherit', '__parent__') + \
+        field.Fields(interfaces.IWeightedItem)
 
     def __call__(self):
         self.update()
@@ -45,47 +33,13 @@ class LabelView(BrowserView):
     
     def __call__(self):
         return _('categoryset-label',
-                 u"Category Set: $CATEGORYSET",
+                 u"Set of Category Labels: $CATEGORYSET",
                  mapping = {'CATEGORYSET': self.context.__name__},
                  )
 
 
 class AddCategorySet(form.AddForm):
     """Add a new category set to the categories container.
-
-        >>> from z3c.form.testing import setupFormDefaults, TestRequest
-        >>> setupFormDefaults()
-        >>> request = TestRequest()
-        >>> from quotationtool.categorization.browser.categoryset \
-                import AddCategorySet
-        >>> form = AddCategorySet(root, request)
-        >>> form.update()
-
-        >>> form.widgets.keys()
-        ['weight', 'title', 'description', 'categorizable_items', 'mode', 'inherit', 'relation_indices', 'open_to_users', 'complete']
-        
-        >>> form.prefix
-        'form.'
-
-        >>> form.widgets['weight'].name
-        'form.widgets.weight'
-
-        >>> form.buttons.keys()
-        ['add']
-
-        >>> request = TestRequest(form = {
-        ...     'form.widgets.weight': u"3",
-        ...     'form.widgets.title': u"Faculty",
-        ...     'form.widgets.description': u"The department ...",
-        ...     'form.widgets.categorizabel_items': [],
-        ...     'form.widgets.mode': u"exclusive",
-        ...     'form.widgets.inherit': u"",
-        ...     'form.buttons.add': u"Add",
-        ...     })
-
-        >>> form = AddCategorySet(root, request)
-        >>> form.update() # TODO
-
     """
 
     label = _('categoryset-add-label',

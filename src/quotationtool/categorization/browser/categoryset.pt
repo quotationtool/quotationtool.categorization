@@ -17,7 +17,7 @@
 	</td>
 	<td class="weight">
 	  <span 
-	      tal:content="modules/quotationtool/categorization/interfaces/ICategory/weight/title"
+	      tal:content="modules/quotationtool/categorization/interfaces/IWeightedItem/weight/title"
 	      />
 	</td>
       </tr>
@@ -42,10 +42,10 @@
     </tbody>
   </table>
 
-  <div class="add-content-options">
+  <div class="add-content-options" tal:condition="python: context.__parent__.__name__ == 'categories'">
     <a i18n:translate="add-category"
        href="addCategory.html"
-       tal:attributes="href string:${context/@@absolute_url}/@@addCategory.html"
+       tal:attributes="href string:${context/@@absolute_url}/@@addCategory.html#tabs"
        >Add a new Category</a>
   </div>
 

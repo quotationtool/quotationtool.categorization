@@ -1,0 +1,17 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:browser="http://namespaces.zope.org/browser"
+    xmlns:z3c="http://namespaces.zope.org/z3c"
+    i18n_domain="quotationtool">
+
+  <browser:viewlet
+      name="quotationtool.categorization.browser.search.SearchFormExtension"
+      for="*"
+      manager="quotationtool.search.interfaces.ISearchFormExtension"
+      class=".search.SearchFormExtension"
+      layer="quotationtool.skin.interfaces.IQuotationtoolBrowserLayer"
+      permission="zope.View"
+      weight="100"
+      />
+
+</configure>

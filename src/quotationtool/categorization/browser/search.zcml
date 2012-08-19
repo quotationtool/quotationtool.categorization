@@ -14,4 +14,10 @@
       weight="100"
       />
 
+  <adapter
+      factory=".search.attribution_factory"
+      for="..interfaces.IAttributionSearchFilter"
+      name="attribution-set"
+      />
+
 </configure>

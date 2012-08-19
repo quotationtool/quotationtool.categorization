@@ -143,24 +143,16 @@ def setUpIntIds(test):
     else:
         zope.component.provideUtility(IntIds(), IIntIds)
 
-def setUpAttributionIndex(test):
+def setUpIndices(test):
     from z3c.indexer.interfaces import IIndex
     from z3c.indexer.index import SetIndex
     site = hooks.getSite()
     if zope.component.interfaces.ISite.providedBy(site):
         sm = site.getSiteManager()
-        sm['default']['attribution-set'] = cat = SetIndex()
-        sm.registerUtility(cat, IIndex, name='attribution-set')
+        sm['default']['attribution-set'] = idx = SetIndex()
+        sm.registerUtility(idx, IIndex, name='attribution-set')
+        sm['default']['related-attribution-set'] = idx = SetIndex()
+        sm.registerUtility(idx, IIndex, name='related-attribution-set')
     else:
         zope.component.provideUtility(SetIndex(), IIndex, name='attribution-set')
-
-def setUpRelatedAttributionIndex(test):
-    from z3c.indexer.interfaces import IIndex
-    from z3c.indexer.index import SetIndex
-    site = hooks.getSite()
-    if zope.component.interfaces.ISite.providedBy(site):
-        sm = site.getSiteManager()
-        sm['default']['related-attribution-set'] = cat = SetIndex()
-        sm.registerUtility(cat, IIndex, name='related-attribution-set')
-    else:
         zope.component.provideUtility(SetIndex(), IIndex, name='related-attribution-set')

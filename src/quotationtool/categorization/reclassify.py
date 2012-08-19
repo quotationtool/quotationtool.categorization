@@ -1,6 +1,8 @@
 from zope.interface import implements
 import zope.component
 from zope.wfmc.interfaces import ProcessError, IProcessContext
+from zope.lifecycleevent import ObjectModifiedEvent
+import zope.event
 
 from quotationtool.workflow.workitem import WorkItemBase
 from quotationtool.workflow.interfaces import IStandardParameters
@@ -48,5 +50,6 @@ class ReclassificationContext(object):
         if finish == 'accept':
             annotation = interfaces.IAttribution(self.item)
             annotation.set(object_.get())
-            zope.event.notify(interfaces.AttributionModifiedEvent(self.item))
+            zope.event.notify(ObjectModifiedEvent(self.item))
+            #zope.event.notify(interfaces.AttributionModifiedEvent(self.item))
 

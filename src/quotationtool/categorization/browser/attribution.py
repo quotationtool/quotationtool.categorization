@@ -13,11 +13,14 @@ from zope.wfmc.interfaces import IProcessDefinition
 from zope.viewlet.viewlet import ViewletBase
 from zope.app.pagetemplate.viewpagetemplatefile import ViewPageTemplateFile
 import datetime
+import zope.event
+from zope.lifecycleevent import ObjectModifiedEvent
 
 from quotationtool.skin.interfaces import ITabbedContentLayout
 from quotationtool.workflow.interfaces import IWorkItemForm, IWorkflowHistory
 from quotationtool.workflow.browser import common
 from quotationtool.workflow.history import UserNotation
+from quotationtool.workflow.workitem import findWorkItemsForItemAndProcessId
 
 from quotationtool.categorization import interfaces
 from quotationtool.categorization.interfaces import _
@@ -256,6 +259,10 @@ class ReclassificationForm(form.Form):
         return interaction.checkPermission('quotationtool.workflow.DoEditorialReview', self.context)
 
     def update(self):
+        # assert that there are no other classification processes
+        if findWorkItemsForItemAndProcessId(self.context, 'quotationtool.reclassify') or \
+                findWorkItemsForItemAndProcessId(self.context, 'quotationtool.classify'):
+            raise UserError(_(u"This database item is subject of a classification task already. It must be finished before a new classification process is started."))
         super(ReclassificationForm, self).update()
         self.updateAttributionSubForm()
         if self.checkPermission():
@@ -301,6 +308,7 @@ class ReclassificationForm(form.Form):
         history.append(UserNotation(
                 getattr(principal, 'id', u"Unknown"),
                 data['workflow-message']))
+        zope.event.notify(ObjectModifiedEvent(self.context))
         # redirect to next url
         self.request.response.redirect(self.nextURL())
 

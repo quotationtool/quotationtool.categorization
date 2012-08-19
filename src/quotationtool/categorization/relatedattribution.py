@@ -39,13 +39,13 @@ class RelatedAttribution(object):
 
     union = BTrees.family32.OO.union
     intersection = BTrees.family32.OO.intersection
+    attribution_factory = BTrees.family32.OO.TreeSet
 
     def __init__(self, context):
         self.context = context
 
     def getAttribution(self, category_set=interfaces.ALL):
-        _useless = interfaces.IAttribution(self.context)
-        attribution = _useless.attribution_factory()
+        attribution = self.attribution_factory()
         # get integer id of context object
         intids = zope.component.getUtility(IIntIds, context=self.context)
         context_id = intids.getId(self.context)
@@ -75,8 +75,8 @@ class RelatedAttribution(object):
                                 provided = True
                         if info['name'] in category_set.relation_indices and provided:
                             # calculate attribution
-                            categories = _useless.attribution_factory(category_set.keys())
-                            relattr = _useless.attribution_factory(relattr)
+                            categories = self.attribution_factory(category_set.keys())
+                            relattr = self.attribution_factory(relattr)
                             attr = self.intersection(relattr, categories)
                             attribution = self.union(attribution, attr)
         return list(attribution)
@@ -101,11 +101,11 @@ class IntrinsicRelationIndexer(ValueIndexer):
 
     union = BTrees.family32.OO.union
     intersection = BTrees.family32.OO.intersection
+    attribution_factory = BTrees.family32.OO.TreeSet
 
     @property
     def value(self):
-        _useless = interfaces.IAttribution(self.context)
-        attribution = _useless.attribution_factory()
+        attribution = self.attribution_factory()
         intids = zope.component.getUtility(IIntIds, context=self.context)
         context_id = intids.getId(self.context)
         category_sets = zope.component.queryUtility(
@@ -122,8 +122,8 @@ class IntrinsicRelationIndexer(ValueIndexer):
                             if iface.providedBy(self.context):
                                 provided = True
                         if info['name'] in category_set.relation_indices and provided:
-                            categories = _useless.attribution_factory(category_set.keys())
-                            relattr = _useless.attribution_factory(relattr)
+                            categories = self.attribution_factory(category_set.keys())
+                            relattr = self.attribution_factory(relattr)
                             attr = self.intersection(relattr, categories)
                             attribution = self.union(attribution, attr)
         return list(attribution)

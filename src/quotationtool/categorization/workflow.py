@@ -7,6 +7,7 @@ from zope.security.management import getInteraction
 import datetime
 from zope.publisher.interfaces import IRequest
 from zope.security.interfaces import IPrincipal
+from zope.lifecycleevent import ObjectModifiedEvent
 
 from quotationtool.workflow import wp29
 from quotationtool.workflow.interfaces import IWorkflowHistory
@@ -65,8 +66,8 @@ class ClassificationContext(Persistent, wp29.CancellingContext):
     def finishedHook(self):
         annotation = interfaces.IAttribution(self.item)
         annotation.set(self.object_.get())
-        zope.event.notify(interfaces.AttributionModifiedEvent(self.item))
-        #raise Exception(self.object_)
+        zope.event.notify(ObjectModifiedEvent(self.item))
+        #zope.event.notify(interfaces.AttributionModifiedEvent(self.item))
 
 
 def classifySubscriber(item, event):

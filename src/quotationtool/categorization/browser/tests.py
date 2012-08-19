@@ -65,8 +65,7 @@ class AttributionTests(placelesssetup.PlacelessSetup, unittest.TestCase):
         testing.generateCategorizableItemDescriptions(self.root)
         testing.generateCategoriesContainer(self.root)
         testing.setUpIntIds(self)
-        testing.setUpAttributionIndex(self)
-        testing.setUpRelatedAttributionIndex(self)
+        testing.setUpIndices(self)
         testing.setUpRelationCatalog(self)
         from quotationtool.workflow import testing as workflowtesting
         workflowtesting.setUpWorkLists(self.root)
@@ -201,9 +200,65 @@ class AttributionTests(placelesssetup.PlacelessSetup, unittest.TestCase):
         self.assertTrue(len(self.editor_items.values()) == 0)
 
 
+class SearchTests(placelesssetup.PlacelessSetup, unittest.TestCase):
+
+    def setUp(self):
+        super(SearchTests, self).setUp()
+        self.root = placefulSetUp(True)
+        setUpZCML(self)
+        import quotationtool.search
+        XMLConfig('configure.zcml', quotationtool.search)()
+        hooks.setSite(self.root)
+        # we need a transaction
+        from zope.security.management import newInteraction
+        interaction = newInteraction()
+        testing.generateCategorizableItemDescriptions(self.root)
+        testing.generateCategoriesContainer(self.root)
+        testing.setUpIntIds(self)
+        testing.setUpIndices(self)
+        testing.setUpRelationCatalog(self)
+        self.root['item1'] = item1 = testing.Categorizable()
+        self.root['item2'] = item2 = testing.Categorizable()
+        from zope.intid.interfaces import IIntIds
+        self.intids = zope.component.getUtility(IIntIds, context=self.root)
+        self.intids.register(self.root['item1'])
+        self.intids.register(self.root['item2'])
+        attribution1 = interfaces.IAttribution(item1)
+        attribution1.set(('cat11', 'cat21', 'cat31',)) 
+        attribution2 = interfaces.IAttribution(item2)
+        attribution2.set(('cat12', 'cat22', 'cat32',))
+        from quotationtool.search.searcher import QuotationtoolSearchFilter
+        zope.interface.classImplements(
+            QuotationtoolSearchFilter, 
+            interfaces.IAttributionSearchFilter)
+        
+    def tearDown(self):
+        super(SearchTests, self).tearDown()
+        tearDown(self)
+        placefulTearDown()
+
+    def test_RenderSearchForm(self):
+        from quotationtool.search.browser.searcher import SearchForm
+        pagelet = SearchForm(self.root, TestRequest())
+        pagelet.update()
+        self.assertTrue(isinstance(pagelet.render(), unicode))
+        self.assertTrue('cat12' in pagelet.render())
+
+    def test_Query(self):
+        from quotationtool.search.browser.searcher import SearchForm
+        request = TestRequest(form={
+                'search.button.search': 'search',
+                'categorization.0.0.connector': 'AND',
+                'categorization.0.0.criterium': 'attribution-set',
+                'categorization.0.0.value': 'cat11',
+                })
+        pagelet = SearchForm(self.root, request)
+        #pagelet.update()# TODO: why is there no index?
+
 
 def test_suite():
     return unittest.TestSuite((
+        unittest.makeSuite(SearchTests),
         doctest.DocTestSuite(datamanager,
                              setUp = setUpDataManager,
                              tearDown = tearDownPlaces,

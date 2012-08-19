@@ -59,28 +59,7 @@ def tearDownCategorySet(test):
     _clear()
 
 
-def setUpRelationCatalog(test):
-    import zc.relation
-    cat = zc.relation.catalog.Catalog(testing.dump, testing.load)
-    zope.component.provideUtility(cat, zc.relation.interfaces.ICatalog)
-    def dummy(obj, catalog):
-        return getattr(obj, 'ref', None)
-    cat.addValueIndex(dummy, testing.dump, testing.load)
-
-
-def setUpAttributionIndex(test):
-    from z3c.indexer.interfaces import IIndex
-    from z3c.indexer.index import SetIndex
-    zope.component.provideUtility(SetIndex(), IIndex, name='attribution-set')
-
-
-def setUpRelatedAttributionIndex(test):
-    from z3c.indexer.interfaces import IIndex
-    from z3c.indexer.index import SetIndex
-    zope.component.provideUtility(SetIndex(), IIndex, name='related-attribution-set')
-
-
-def setUpIntIds(test):
+def OFFsetUpIntIds(test):
     from zope.intid import IntIds
     from zope.intid.interfaces import IIntIds
     from zope.keyreference.testing import SimpleKeyReference
@@ -90,17 +69,15 @@ def setUpIntIds(test):
 
 def setUpPlay(test):
     setUpZCML(test)
-    setUpAttributionIndex(test)
-    setUpIntIds(test)
+    testing.setUpIndices(test)
+    testing.setUpIntIds(test)
 
 
 def setUpWorkflowConfig(test):
     setUpZCML(test)
-    setUpIntIds(test)
     test.globs['root'] = root = rootFolder()
-    setUpIntIds(test)
-    setUpAttributionIndex(test)
-    setUpRelatedAttributionIndex(test)
+    testing.setUpIntIds(test)
+    testing.setUpIndices(test)
     from quotationtool.workflow.testing import setUpIndices as setUpWorkflowIndices
     setUpWorkflowIndices(test)
 
@@ -109,8 +86,8 @@ def setUpRelatedAttribution(test):
     placelesssetup.setUp(test)
     setUpZCML(test)
     test.globs['root'] = root = rootFolder()
-    setUpAttributionIndex(test)
-    setUpIntIds(test)
+    testing.setUpIndices(test)
+    testing.setUpIntIds(test)
     interaction = newInteraction()
 
 
@@ -181,9 +158,8 @@ class CategoriesContainerTests(PlacelessSetup, unittest.TestCase):
         interaction = newInteraction() # needed for generation of categories
         testing.generateCategorizableItemDescriptions(self.root)
         testing.generateCategoriesContainer(self.root)
-        setUpAttributionIndex(self)
-        setUpRelatedAttributionIndex(self)
-        setUpIntIds(self)
+        testing.setUpIndices(self)
+        testing.setUpIntIds(self)
         from quotationtool.categorization.interfaces import ICategoriesContainer
         self.categories = zope.component.getUtility(ICategoriesContainer, context=self.root)
         
@@ -223,12 +199,11 @@ class AttributionTests(PlacelessSetup, unittest.TestCase):
         super(AttributionTests, self).setUp()
         setUpZCML(self)
         self.root = rootFolder()
-        setUpIntIds(self)
+        testing.setUpIntIds(self)
         interaction = newInteraction() # needed for generation of categories
         testing.generateCategorizableItemDescriptions(self.root)
         testing.generateCategoriesContainer(self.root)
-        setUpAttributionIndex(self)
-        setUpRelatedAttributionIndex(self)
+        testing.setUpIndices(self)
         from quotationtool.categorization.interfaces import ICategoriesContainer
         self.categories = zope.component.getUtility(ICategoriesContainer, context=self.root)
         
@@ -371,13 +346,12 @@ class RelatedAttributionTests(PlacelessSetup, unittest.TestCase):
         super(AttributionTests, self).setUp()
         setUpZCML(self)
         self.root = rootFolder()
-        setUpIntIds(self)
+        testing.setUpIntIds(self)
         interaction = newInteraction() # needed for generation of categories
         testing.generateCategorizableItemDescriptions(self.root)
         testing.generateCategoriesContainer(self.root)
-        setUpAttributionIndex(self)
-        setUpRelatedAttributionIndex(self)
-        setUpRelationCatalog(self)
+        testing.setUpIndices(self)
+        testing.setUpRelationCatalog(self)
         from quotationtool.categorization.interfaces import ICategoriesContainer
         self.categories = zope.component.getUtility(ICategoriesContainer, context=self.root)
         
@@ -395,8 +369,7 @@ class ReclassificationTests(placelesssetup.PlacelessSetup, unittest.TestCase):
         interaction = newInteraction() # needed for generation of categories
         testing.generateCategorizableItemDescriptions(self.root)
         testing.generateCategoriesContainer(self.root)
-        testing.setUpAttributionIndex(self)
-        testing.setUpRelatedAttributionIndex(self)
+        testing.setUpIndices(self)
         testing.setUpRelationCatalog(self)
         from quotationtool.workflow import testing as workflowtesting
         workflowtesting.setUpWorkLists(self.root)
@@ -407,6 +380,10 @@ class ReclassificationTests(placelesssetup.PlacelessSetup, unittest.TestCase):
         self.item = self.root['item'] = testing.Categorizable()
         attr = interfaces.IAttribution(self.item)
         attr.set(('cat12', 'cat22', 'cat32'))
+
+    def tearDown(self):
+        placefulTearDown()
+        super(ReclassificationTests, self).tearDown()
 
     def startWorkflow(self):
         from zope.wfmc.interfaces import IProcessDefinition

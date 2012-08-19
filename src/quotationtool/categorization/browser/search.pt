@@ -1,2 +1,37 @@
-<div  class="search-categories" i18n:domain="quotationtool">
+<div  id="search-categories" i18n:domain="quotationtool">
+
+  <div tal:repeat="categoryset python:view.categories().values()">
+    <fieldset>
+      <legend
+	  i18n:translate="" tal:content="categoryset/title">
+	Title
+      </legend>
+      <tal:block
+	   tal:condition="python:getattr(categoryset, 'searchform_representation', 'checkboxes')=='checkboxes'">
+	<div class="category-checkbox-row" 
+	     tal:repeat="category categoryset/values">
+	  <select class="connector" name="search.1.connector"
+		  tal:attributes="name string:${view/prefix}${repeat/categoryset/index}.${repeat/category/index}.connector">
+	    <option selected="selected"
+		    value="AND" i18n:translate="">and</option>
+	    <option
+		value="OR" i18n:translate="">or</option>
+	    <option
+		value="NOT" i18n:translate="">not</option>
+	  </select>
+	  <!--input type="hidden" name="categorization.0.connector" value="AND"
+		 tal:attributes="name string:${view/prefix}${repeat/categoryset/index}.${repeat/category/index}.connector"/-->
+	  <input type="hidden" name="" value=""
+		 tal:attributes="name string:${view/prefix}${repeat/categoryset/index}.${repeat/category/index}.criterium;
+				 value string:attribution-set"/>
+	    <input class="category-checkbox" type="checkbox" name="" value=""
+		   tal:attributes="name string:${view/prefix}${repeat/categoryset/index}.${repeat/category/index}.value;
+				   value python:category.__name__.encode('ascii', 'xmlcharrefreplace')"/>
+	  <span class="title" tal:content="category/title">
+	  </span>
+	</div>
+      </tal:block>
+    </fieldset>
+  </div>
+
 </div>

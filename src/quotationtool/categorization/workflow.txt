@@ -38,6 +38,10 @@ Create some content:
 >>> from quotationtool.categorization import testing
 >>> foo = testing.Categorizable()
 
+>>> from zope.intid.interfaces import IIntIds
+>>> intids =zope.component.getUtility(IIntIds)
+>>> foo_id = intids.register(foo)
+
 We need a history:
 
 >>> from quotationtool.workflow.interfaces import IWorkflowHistory, IHasWorkflowHistory
@@ -177,6 +181,7 @@ Test editorial review
 
 
 >>> bar = testing.Categorizable()
+>>> bar_id = intids.register(bar)
 >>> history = IWorkflowHistory(bar)
 >>> context = workflow.ClassificationContext(bar)
 >>> proc = pd(context)

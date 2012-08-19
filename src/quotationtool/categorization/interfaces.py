@@ -6,6 +6,7 @@ from zope.container.interfaces import INameChooser
 from zope.container.constraints import containers, contains
 from zope.app.component.hooks import getSite
 from zope.i18nmessageid import MessageFactory
+from z3c.searcher.interfaces import ISearchFilter
 
 _ = MessageFactory('quotationtool')
 
@@ -360,6 +361,16 @@ class IClassificationWorkItem(zope.interface.Interface):
 
 class IReclassificationWorkItem(zope.interface.Interface):
     """ A workflow item used if the data base item was reclassified."""
+
+
+class IAttributionSearchFilter(ISearchFilter):
+    """ A marker interface in order to register attribution related
+    search criteria. 
+
+    Note: There is no implementation of a search filter at the
+    moment. We only use this interface as a marker, that can be
+    implemented by other search filters."""
+
 
 
 ### BBB: will be removed

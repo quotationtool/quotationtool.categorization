@@ -15,6 +15,8 @@ from zope.app.pagetemplate.viewpagetemplatefile import ViewPageTemplateFile
 import datetime
 import zope.event
 from zope.lifecycleevent import ObjectModifiedEvent
+from zope.exceptions.interfaces import UserError
+from zope.location.location import LocationIterator
 
 from quotationtool.skin.interfaces import ITabbedContentLayout
 from quotationtool.workflow.interfaces import IWorkItemForm, IWorkflowHistory
@@ -196,6 +198,12 @@ class ContributorBranchForm(WorkItemBaseForm):
     @button.buttonAndHandler(_(u"Cancel"), name="cancel")
     def handleCancel(self, action):
         self.request.response.redirect(self.nextURL())
+
+    def nextURL(self):
+        for location in LocationIterator(self.context):
+            if zope.component.interfaces.ISite.providedBy(location):
+                break
+        return absoluteURL(location, self.request) + u"/account/@@worklist.html"
 
 
 class CategorizationProcessName(BrowserView):

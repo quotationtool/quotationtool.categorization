@@ -46,7 +46,12 @@
 
   <grant
       permission="quotationtool.categorization.EditCategory"
-      role="quotationtool.Member"
+      role="quotationtool.Creator"
+      />
+
+  <grant
+      permission="quotationtool.categorization.EditCategory"
+      role="quotationtool.Editor"
       />
 
 

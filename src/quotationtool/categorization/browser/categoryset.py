@@ -46,7 +46,7 @@ class AddCategorySet(form.AddForm):
               u"Add a new Category Set")
     
     fields = field.Fields(interfaces.ICategorySet).omit(
-        '__name__', '__parent__', 'items_weight_attribute')
+        '__name__', '__parent__', 'items_weight_attribute', 'inherit')
     fields['categorizable_items'].widgetFactory = NonExclusiveAttributionFieldWidget
     fields['mode'].widgetFactory = ExclusiveAttributionFieldWidget
 
@@ -85,7 +85,7 @@ class EditCategorySet(form.EditForm):
               u"Edit Category Set")
 
     fields = field.Fields(interfaces.ICategorySet).omit(
-        '__name__', '__parent__', 'items_weight_attribute')
+        '__name__', '__parent__', 'items_weight_attribute', 'inherit')
     fields['categorizable_items'].widgetFactory = NonExclusiveAttributionFieldWidget
     fields['mode'].widgetFactory = ExclusiveAttributionFieldWidget
 

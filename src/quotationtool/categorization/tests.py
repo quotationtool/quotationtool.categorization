@@ -366,11 +366,11 @@ class ReclassificationTests(placelesssetup.PlacelessSetup, unittest.TestCase):
         setUpZCML(self)
         hooks.setSite(self.root)
         testing.setUpIntIds(self)
+        testing.setUpIndices(self)
+        testing.setUpRelationCatalog(self)
         interaction = newInteraction() # needed for generation of categories
         testing.generateCategorizableItemDescriptions(self.root)
         testing.generateCategoriesContainer(self.root)
-        testing.setUpIndices(self)
-        testing.setUpRelationCatalog(self)
         from quotationtool.workflow import testing as workflowtesting
         workflowtesting.setUpWorkLists(self.root)
         workflowtesting.setUpIndices(self)
@@ -426,7 +426,7 @@ class ReclassificationTests(placelesssetup.PlacelessSetup, unittest.TestCase):
         self.assertTrue('cat22' in interfaces.IAttribution(self.item).get())
         self.assertTrue('cat32' in interfaces.IAttribution(self.item).get())
 
-    def OFFtest_IfIndexed(self):
+    def test_IfIndexed(self):
         from zope.intid.interfaces import IIntIds
         intids = zope.component.getUtility(IIntIds, context=self.root)
         iid = intids.register(self.item)

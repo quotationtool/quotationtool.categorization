@@ -46,7 +46,7 @@ class AttributionFieldsMixin(object):
         for category_set in categories.values():
             # only create widget if category vector is applicable to context 
             for iface in category_set.categorizable_items:
-                if iface in zope.interface.providedBy(self.getCategorizableItem()):
+                if iface in zope.interface.providedBy(self.getCategorizableItem()) or iface in zope.interface.directlyProvidedBy(self.getCategorizableItem()):
                     # lookup an adapter depending on mode
                     if category_set.mode == 'exclusive':
                         fld = interfaces.IExclusiveAttributionField(category_set)
@@ -56,6 +56,7 @@ class AttributionFieldsMixin(object):
                     # __name__. It has to be a ascii, so we use a hash
                     fld.__name__ = category_set.__name__.encode('ascii','xmlcharrefreplace')
                     flds += field.Fields(fld)
+                    break# once is enough!
         return flds
 
     

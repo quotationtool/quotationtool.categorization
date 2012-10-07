@@ -66,6 +66,11 @@
   <label for=""
          tal:attributes="for item/id">
     <span class="label" tal:content="item/label">Label</span>
+    <span class="description" 
+	  tal:condition="python: view.mode=='input'"
+	  tal:content="structure item/query_description|nothing">
+      Description
+    </span>
   </label>
 </span>
 <input name="field-empty-marker" type="hidden" value="1"

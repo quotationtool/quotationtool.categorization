@@ -159,6 +159,12 @@
       layer="z3c.form.interfaces.IFormLayer"
       widget="quotationtool.categorization.browser.widget.IExclusiveAttributionWidget"
       />
+  <z3c:widgetTemplate
+      mode="input"
+      template="exclusive.pt"
+      layer="z3c.form.interfaces.IFormLayer"
+      widget="quotationtool.categorization.browser.widget.IExclusiveAttributionWidget"
+      />
 
   <class 
       class=".widget.NonExclusiveAttributionWidget">
@@ -174,6 +180,12 @@
 
   <z3c:widgetTemplate
       mode="display"
+      template="nonexclusive.pt"
+      layer="z3c.form.interfaces.IFormLayer"
+      widget=".widget.INonExclusiveAttributionWidget"
+      />
+  <z3c:widgetTemplate
+      mode="input"
       template="nonexclusive.pt"
       layer="z3c.form.interfaces.IFormLayer"
       widget=".widget.INonExclusiveAttributionWidget"

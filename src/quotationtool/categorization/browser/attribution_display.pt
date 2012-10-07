@@ -10,7 +10,14 @@
 
     <metal:block fill-slot="main">
       <div id="attribution-rows">
-	<metal:block use-macro="macro:attribution-rows"/>
+	<metal:block use-macro="macro:attribution-rows">
+	  <metal:slot fill-slot="categoryset-description">
+	    <span
+		tal:content="structure widget/field/description | nothing">
+	      Description
+	    </span>
+	  </metal:slot>
+	</metal:block>
       </div>
     </metal:block>
 

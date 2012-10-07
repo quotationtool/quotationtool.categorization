@@ -141,13 +141,15 @@
 	set_schema="zope.location.interfaces.IContained"
 	/>
     <allow
-	attributes="title description categorizable_items mode
+	attributes="title description query_description long_description
+		    categorizable_items mode
 		    relation_indices open_to_users complete
 		    weight items_weight_attribute"
 	/>
     <require
 	permission="quotationtool.categorization.AddCategory"
-	set_attributes="title description categorizable_items mode
+	set_attributes="title description query_description long_description
+			categorizable_items mode
 			relation_indices open_to_users complete
 			weight"
 	/>
@@ -156,15 +158,10 @@
 	attributes="__update_order__"
 	/>
     <!--BBB: require
-	permission="quotationtool.categorization.DoAttribution"
-	interface=".interfaces.IAttributionInjection"
-	/>
-    <allow
-	interface=".interfaces.IAttributionQuery"
-	/>
-    <allow
-	interface=".interfaces.IAttributionTreeSet"
-	/-->
+         permission="quotationtool.categorization.DoAttribution"
+         interface=".interfaces.IAttributionInjection" /> <allow
+         interface=".interfaces.IAttributionQuery" /> <allow
+         interface=".interfaces.IAttributionTreeSet" /-->
   </class>
 
   <utility

@@ -95,6 +95,9 @@ class ExclusiveAttributionField(zope.schema.Choice):
         'vocabulary': categoryVocabularyFactory(context),
         }
         super(ExclusiveAttributionField, self).__init__(**kw)
+        query_description = getattr(context, 'query_description')
+        if query_description:
+            self.query_description = query_description
         
 
 class NonExclusiveAttributionField(zope.schema.List):
@@ -157,3 +160,6 @@ class NonExclusiveAttributionField(zope.schema.List):
             ),
         }
         super(NonExclusiveAttributionField, self).__init__(**kw)
+        query_description = getattr(context, 'query_description')
+        if query_description:
+            self.query_description = query_description

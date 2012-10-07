@@ -10,6 +10,8 @@ from zope.i18nmessageid import MessageFactory
 from zope.app.pagetemplate.viewpagetemplatefile import ViewPageTemplateFile
 from zope.publisher.browser import BrowserView
 from zope.securitypolicy.interfaces import IPrincipalRoleManager
+from z3c.form.browser.checkbox import CheckBoxFieldWidget
+from z3c.form.browser.radio import RadioFieldWidget
 
 from quotationtool.categorization import interfaces
 from quotationtool.categorization.categoryset import CategorySet
@@ -47,8 +49,8 @@ class AddCategorySet(form.AddForm):
     
     fields = field.Fields(interfaces.ICategorySet).omit(
         '__name__', '__parent__', 'items_weight_attribute', 'inherit')
-    fields['categorizable_items'].widgetFactory = NonExclusiveAttributionFieldWidget
-    fields['mode'].widgetFactory = ExclusiveAttributionFieldWidget
+    fields['categorizable_items'].widgetFactory = CheckBoxFieldWidget
+    fields['mode'].widgetFactory = RadioFieldWidget
 
     def create(self, data):
         category_set = CategorySet()
@@ -86,8 +88,8 @@ class EditCategorySet(form.EditForm):
 
     fields = field.Fields(interfaces.ICategorySet).omit(
         '__name__', '__parent__', 'items_weight_attribute', 'inherit')
-    fields['categorizable_items'].widgetFactory = NonExclusiveAttributionFieldWidget
-    fields['mode'].widgetFactory = ExclusiveAttributionFieldWidget
+    fields['categorizable_items'].widgetFactory = CheckBoxFieldWidget
+    fields['mode'].widgetFactory = RadioFieldWidget
 
 
 class CategorySetContainerPagelet(BrowserPagelet):

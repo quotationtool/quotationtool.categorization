@@ -29,10 +29,15 @@
                         tal:condition="widget/required">*</span>
                 </label>
 		<div class="description">
+		  <metal:slot define-slot="categoryset-description">
 		  <span
-		      tal:content="structure widget/field/description | default">
-		    (No description available)
+		      tal:content="structure widget/field/query_description | default">
+		    <span
+			tal:content="structure widget/field/description | nothing">
+		      Description
+		    </span>
 		  </span>
+		  </metal:slot>
 		  <a href=""
 		      class="content-item"
 		      tal:attributes="href widget/field/category_set/@@absolute_url"

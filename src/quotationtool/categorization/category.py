@@ -17,4 +17,5 @@ class Category(Persistent, Contained, Attribution):
 
     title = FieldProperty(interfaces.ICategory['title'])
     description = FieldProperty(interfaces.ICategory['description'])
+    query_description = FieldProperty(interfaces.ICategory['query_description'])
     weight = FieldProperty(interfaces.IWeightedItem['weight'])

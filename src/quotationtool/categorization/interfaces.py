@@ -154,6 +154,14 @@ class ICategory(zope.interface.Interface):
         required = True,
         )
     
+    query_description = zope.schema.Text(
+        title = _('icategory-querydescription-title',
+                  u"Query Description"),
+        description = _('icategory-querydescription-desc',
+                        u"Description showing up in the query/attribution form."),
+        required = False,
+        )
+    
 
 class ICategorySet(zope.interface.Interface):#IWeightedItemsContainer, IWeightedItem):
     """A set of related (exclusive/ non-exclusive) categories."""
@@ -174,8 +182,24 @@ class ICategorySet(zope.interface.Interface):#IWeightedItemsContainer, IWeighted
         title = _('icategoryset-description-title',
                   u"Description"),
         description = _('icategoryset-description-desc',
-                        u"Short description or explanation."),
+                        u"Short description or explanation showing up in the classification of an item."),
         required = True,
+        )
+
+    query_description = zope.schema.Text(
+        title = _('icategoryset-querydescription-title',
+                  u"Query Description"),
+        description = _('icategoryset-querydescription-desc',
+                        u"Description showing up in the classification form."),
+        required = False,
+        )
+
+    long_description = zope.schema.Text(
+        title = _('icategoryset-longdescription-title',
+                  u"Long Description"),
+        description = _('icategoryset-longdescription-desc',
+                        u"Long Description that is not showing in the context of an item at all."),
+        required = False,
         )
 
     categorizable_items = zope.schema.List(

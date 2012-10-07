@@ -21,6 +21,8 @@ class CategorySet(WeightedItemsContainer, Contained, Attribution):
 
     title = FieldProperty(interfaces.ICategorySet['title'])
     description = FieldProperty(interfaces.ICategorySet['description'])
+    query_description = FieldProperty(interfaces.ICategorySet['query_description'])
+    long_description = FieldProperty(interfaces.ICategorySet['long_description'])
     mode = FieldProperty(interfaces.ICategorySet['mode'])
     categorizable_items = FieldProperty(interfaces.ICategorySet['categorizable_items'])
     relation_indices = FieldProperty(interfaces.ICategorySet['relation_indices'])

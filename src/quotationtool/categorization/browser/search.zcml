@@ -9,6 +9,7 @@
       for="*"
       manager="quotationtool.search.interfaces.ISearchFormExtension"
       class=".search.SearchFormExtension"
+      view="quotationtool.search.browser.searcher.SearchForm"
       layer="quotationtool.skin.interfaces.IQuotationtoolBrowserLayer"
       permission="zope.View"
       weight="100"
